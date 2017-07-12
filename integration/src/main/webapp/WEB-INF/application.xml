@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:file="http://www.springframework.org/schema/integration/file"
+	xmlns:int-stream="http://www.springframework.org/schema/integration/stream"
+	xmlns:int-ftp="http://www.springframework.org/schema/integration/ftp"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/integration
+		http://www.springframework.org/schema/integration/spring-integration.xsd
+		http://www.springframework.org/schema/integration/file
+        http://www.springframework.org/schema/integration/file/spring-integration-file.xsd
+		http://www.springframework.org/schema/integration/stream
+		http://www.springframework.org/schema/integration/stream/spring-integration-stream.xsd
+		http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<beans:bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<beans:property name="location">
+			<beans:value>classpath:config.properties</beans:value>
+		</beans:property>
+	</beans:bean>
+	
+	<int:poller id="poller" default="true" fixed-delay="60000" />
+
+	<beans:bean id="config" class="com.adp.smartconnect.oraclefusion.compgarn.config.Configuration">
+		<beans:property name="notificationPath" value="${notificationPath}" />
+		<beans:property name="waitTime" value="${waitTime}" />
+		<beans:property name="maxWaitTime" value="${maxWaitTime}" />
+		<beans:property name="fileProcessingDir" value="${fileProcessingDir}" />
+		<beans:property name="pqqWorkDir" value="${pqqWorkDir}" />
+		<beans:property name="pqqProcessedDir" value="${pqqProcessedDir}" />
+		<beans:property name="pqqInboundDir" value="${pqqInboundDir}" />
+		<beans:property name="pqqOutboundDir" value="${pqqOutboundDir}" />
+		<beans:property name="pqqArchiveDir" value="${pqqArchiveDir}" />
+		<beans:property name="pqqErrorDir" value="${pqqErrorDir}" />
+		<beans:property name="lienWorkDir" value="${lienWorkDir}" />
+		<beans:property name="lienProcessedDir" value="${lienProcessedDir}" />
+		<beans:property name="lienInboundDir" value="${lienInboundDir}" />
+		<beans:property name="lienArchiveDir" value="${lienArchiveDir}" />
+		<beans:property name="lienErrorDir" value="${lienErrorDir}" />
+		<beans:property name="pqqDir" value="${pqqDir}" />
+		<beans:property name="lienDr" value="${lienDr}" />
+		<beans:property name="lienOutboundDir" value="${lienOutboundDir}" />
+	</beans:bean>
+
+	<beans:bean id="acceptAllFileListFilter" class="com.adp.smartconnect.oraclefusion.compgarn.file.processing.EvergeFileListFilter">
+		<beans:property name="configuration" ref="config"></beans:property>
+	</beans:bean>
+	
+	<beans:bean id="pqqFilter" parent="acceptAllFileListFilter" class="com.adp.smartconnect.oraclefusion.compgarn.file.processing.PqqFileFilter"></beans:bean>
+
+	<beans:bean id="lienFileFilter" parent="acceptAllFileListFilter" class="com.adp.smartconnect.oraclefusion.compgarn.file.processing.LienFileFilter"></beans:bean>
+
+	<beans:bean id="handler" scope="prototype" class="com.adp.smartconnect.oraclefusion.compgarn.integration.client.FileHandler" >
+		<beans:property name="configuration" ref="config"></beans:property>
+		<beans:property name="clientConfigurations" ref="clientConfigurations"></beans:property>
+		<beans:property name="notifEngine" ref="notifEngine"></beans:property>
+		<beans:property name="fileMover" ref="fileMover"></beans:property>
+	</beans:bean>
+	
+	<beans:bean id="fileMover" class="com.adp.smartconnect.oraclefusion.compgarn.integration.client.FileMover"></beans:bean>
+	
+	<beans:bean id="webContentUpload" scope="prototype" class="com.adp.smartconnect.oraclefusion.compgarn.contentupload.WebContentUpload"></beans:bean>
+	
+	
+	<beans:bean id="loadTask" scope="prototype" class="com.adp.smartconnect.oraclefusion.compgarn.batchloader.impl.BatchLoadTask">
+		<beans:property name="clientConfigurations" ref="clientConfigurations"></beans:property>
+	</beans:bean>
+	
+	<beans:bean id="pqqLoadTask" scope="prototype" class="com.adp.smartconnect.oraclefusion.compgarn.pqq.PqqLoadTask">
+	</beans:bean>
+	
+	<beans:bean id="notifEngine" scope="prototype" class="com.adp.smartconnect.oraclefusion.compgarn.integration.client.NotificationEngine" >
+		<beans:property name="configuration" ref="config"></beans:property>
+		<beans:property name="clientConfigurations" ref="clientConfigurations"></beans:property>
+	</beans:bean>
+	
+	<int:service-activator id="notifFileServiceActivator" input-channel="lienFileChannel" ref="handler" method="handleFile"></int:service-activator>
+
+	<int:channel id="lienFileChannel">
+		<int:queue />
+	</int:channel>
+
+	<file:inbound-channel-adapter id="fileInbound" channel="lienFileChannel" auto-create-directory="true" 
+		directory="file:${fileProcessingDir}${lienDr}${lienInboundDir}" filter="lienFileFilter">
+		<int:poller fixed-rate="1000" />
+	</file:inbound-channel-adapter>
+	
+	<int:channel id="notificationOutputFileChannel">
+		<int:queue />
+	</int:channel>
+	
+	<file:outbound-channel-adapter id="notificationOutbound"
+		channel="notificationOutputFileChannel"
+		directory="file:${fileProcessingDir}${lienDr}${lienOutboundDir}">
+		<int:poller fixed-rate="1000" />
+	</file:outbound-channel-adapter>
+
+	<int:channel id="pqqOutputFileChannel">
+		<int:queue />
+	</int:channel>
+
+	<file:outbound-channel-adapter id="pqqOutbound" 
+		channel="pqqOutputFileChannel" 
+		directory="file:${fileProcessingDir}${pqqDir}${pqqOutboundDir}">
+	</file:outbound-channel-adapter>
+
+
+	<int:channel id="pqqInputFileChannel">
+		<int:queue />
+	</int:channel>
+
+	<file:inbound-channel-adapter id="pqqFileInbound"
+		channel="pqqInputFileChannel" 
+		filter="pqqFilter" directory="file:${fileProcessingDir}${pqqDir}${pqqInboundDir}">
+		<int:poller fixed-rate="100000" />
+	</file:inbound-channel-adapter>
+
+	<int:service-activator input-channel="pqqInputFileChannel" ref="pqqHandler" method="handleFile" />
+	
+	<beans:bean id="clientConfigurations" class="com.adp.smartconnect.oraclefusion.compgarn.listeners.ClientConfigHolder">
+		<beans:property name="configuration" ref="config"></beans:property>
+	</beans:bean>
+
+	<beans:bean id="pqqHandler" class="com.adp.smartconnect.oraclefusion.compgarn.pqq.PqqFileHandler">
+		<beans:property name="configuration" ref="config"></beans:property>
+		<beans:property name="clientConfigurations" ref="clientConfigurations"></beans:property>
+		<beans:property name="fileMover" ref="fileMover"></beans:property>
+	</beans:bean>
+
+</beans:beans>

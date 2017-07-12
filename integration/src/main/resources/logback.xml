@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<layout class="ch.qos.logback.classic.PatternLayout">
+
+			<Pattern>
+				ANT + LogBack : %-5level %logger{36} - %msg%n
+			</Pattern>
+
+		</layout>
+	</appender>
+
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${catalina.base}/logs/sc-oraclefusion-compgarn.log</file>
+		<append>false</append>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- daily rollover -->
+			<!-- <fileNamePattern>C:/logs/everge.%d{yyyy-MM-dd}.%i.log</fileNamePattern>  -->
+			<fileNamePattern>${catalina.base}/logs/sc-oraclefusion-compgarn.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<!-- or whenever the file size reaches 50MB -->
+				<maxFileSize>50MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+			<!-- keep 30 days' worth of history -->
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+			<!-- <pattern>%-5relative %-5level -tx.id=%X{transactionID}  %logger{35} - %msg%n</pattern> -->
+		</encoder>
+	</appender>
+
+	<root level="DEBUG">
+		<appender-ref ref="FILE" />
+	</root>
+
+</configuration>
