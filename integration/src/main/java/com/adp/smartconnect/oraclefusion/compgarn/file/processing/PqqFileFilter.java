@@ -5,11 +5,11 @@ import java.io.File;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PqqFileFilter<F> extends EvergeFileListFilter<F>{
+public class PqqFileFilter<F> extends FileListFilter<F>{
 	
-	protected static final Logger log = LoggerFactory.getLogger(EvergeFileListFilter.class);
+	protected static final Logger log = LoggerFactory.getLogger(PqqFileFilter.class);
 
-	private static String ACCEPTABLE_XTENSIONS = ".PQQ";
+	private static String ACCEPTABLE_XTENSIONS = ".pqq";
 
 	@Override
 	protected boolean accept(F file) {

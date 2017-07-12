@@ -2,13 +2,27 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.everge</groupId>
-	<artifactId>integration</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<groupId>com.adp.smartconnect.oraclefusion.compgarn</groupId>
+	<artifactId>oraclefusion-compgarn-connector</artifactId>
+	<version>1.1.0</version>
 	<packaging>war</packaging>
 
 	<name>integration</name>
 	<url>http://maven.apache.org</url>
+	
+	<distributionManagement>
+		<repository>
+			<id>adp-avs-nexus</id>
+			<name>ADP Nexus Releases</name>
+			<url>http://cdlavsnexus.es.ad.adp.com:8080/nexus/content/repositories/releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>adp-avs-nexus</id>
+			<name>ADP Nexus Snapshots</name>
+			<url>http://cdlavsnexus.es.ad.adp.com:8080/nexus/content/repositories/snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
+	
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -71,7 +85,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
+			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -190,9 +204,19 @@
 			<version>1.1.1</version>
 		</dependency>
 		<dependency>
-			<groupId>com.everge</groupId>
-			<artifactId>ws-integration</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>2.6.3</version>
+    </dependency>
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.6.3</version>
+    </dependency>
+		<dependency>
+			<groupId>com.adp.smartconnect</groupId>
+			<artifactId>oraclefusion-wsdl-code</artifactId>
+			<version>1.0</version>
 		</dependency>
 	</dependencies>
 </project>

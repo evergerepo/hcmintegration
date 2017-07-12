@@ -39,7 +39,7 @@ public class ClientConfigHolder {
 		return clientConfiguration.get(client);
 	}
 
-	private void loadClientProfileXml() {
+	public void loadClientProfileXml() {
 		try {
 			String notificationPath = configuration.getNotificationPath();
 			final File file = new File(notificationPath);

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans:beans xmlns:int="http://www.springframework.org/schema/integration"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:file="http://www.springframework.org/schema/integration/file"
 	xmlns:int-stream="http://www.springframework.org/schema/integration/stream"
 	xmlns:int-ftp="http://www.springframework.org/schema/integration/ftp"
@@ -15,6 +16,10 @@
 		http://www.springframework.org/schema/context 
         http://www.springframework.org/schema/context/spring-context.xsd">
 
+	<context:component-scan base-package="com.adp.smartconnect.oraclefusion.compgarn.controller" />
+	 <context:annotation-config/>
+	 
+	 
 	<beans:bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<beans:property name="location">
 			<beans:value>classpath:config.properties</beans:value>
@@ -41,17 +46,26 @@
 		<beans:property name="lienDr" value="${lienDr}" />
 		<beans:property name="lienOutboundDir" value="${lienOutboundDir}" />
 	</beans:bean>
-	
-	<beans:bean id="clientConfigurations" class="com.adp.smartconnect.oraclefusion.compgarn.listeners.ClientConfigHolder">
+
+	<beans:bean id="acceptAllFileListFilter" class="com.adp.smartconnect.oraclefusion.compgarn.file.processing.FileListFilter">
 		<beans:property name="configuration" ref="config"></beans:property>
 	</beans:bean>
 	
-	<beans:bean id="lienHandler" class="com.adp.smartconnect.oraclefusion.compgarn.integration.client.FileHandler" >
+	<beans:bean id="pqqFilter" parent="acceptAllFileListFilter" class="com.adp.smartconnect.oraclefusion.compgarn.file.processing.PqqFileFilter"></beans:bean>
+
+	<beans:bean id="lienFileFilter" parent="acceptAllFileListFilter" class="com.adp.smartconnect.oraclefusion.compgarn.file.processing.LienFileFilter"></beans:bean>
+
+	<beans:bean id="handler" scope="prototype" class="com.adp.smartconnect.oraclefusion.compgarn.integration.client.FileHandler" >
 		<beans:property name="configuration" ref="config"></beans:property>
 		<beans:property name="clientConfigurations" ref="clientConfigurations"></beans:property>
 		<beans:property name="notifEngine" ref="notifEngine"></beans:property>
 		<beans:property name="fileMover" ref="fileMover"></beans:property>
 	</beans:bean>
+	
+	<beans:bean id="fileMover" class="com.adp.smartconnect.oraclefusion.compgarn.integration.client.FileMover"></beans:bean>
+	
+	<beans:bean id="webContentUpload" scope="prototype" class="com.adp.smartconnect.oraclefusion.compgarn.contentupload.WebContentUpload"></beans:bean>
+	
 	
 	<beans:bean id="loadTask" scope="prototype" class="com.adp.smartconnect.oraclefusion.compgarn.batchloader.impl.BatchLoadTask">
 		<beans:property name="clientConfigurations" ref="clientConfigurations"></beans:property>
@@ -65,6 +79,9 @@
 		<beans:property name="clientConfigurations" ref="clientConfigurations"></beans:property>
 	</beans:bean>
 	
+		<beans:bean id="clientConfigurations" class="com.adp.smartconnect.oraclefusion.compgarn.listeners.ClientConfigHolder">
+		<beans:property name="configuration" ref="config"></beans:property>
+	</beans:bean>
 
 	<beans:bean id="pqqHandler" class="com.adp.smartconnect.oraclefusion.compgarn.pqq.PqqFileHandler">
 		<beans:property name="configuration" ref="config"></beans:property>
@@ -72,66 +89,67 @@
 		<beans:property name="fileMover" ref="fileMover"></beans:property>
 	</beans:bean>
 	
-	<beans:bean id="pqqFilter" parent="acceptAllFileListFilter" class="com.adp.smartconnect.oraclefusion.compgarn.file.processing.PqqFileFilter"></beans:bean>
 	
-	<beans:bean id="lienFileFilter" parent="acceptAllFileListFilter" class="com.adp.smartconnect.oraclefusion.compgarn.file.processing.LienFileFilter"></beans:bean>
+		<!--  RestController supported content Types-->
 	
-	<beans:bean id="acceptAllFileListFilter" class="com.adp.smartconnect.oraclefusion.compgarn.file.processing.EvergeFileListFilter">
-		<beans:property name="configuration" ref="config"></beans:property>
+	<beans:bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+	    <beans:property name="messageConverters">
+	        <beans:list>
+	            <beans:bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                	<beans:property name="supportedMediaTypes" value="application/json" />
+                </beans:bean>
+	        </beans:list>
+	    </beans:property>
 	</beans:bean>
-	
 	
 	
 	<!--  Spring Integration File Inbound/Outbound Channesl -->
 	
-	<int:poller id="poller" default="true" fixed-delay="10000" />
-	
-	<!--  Lien Inbound Channel -->
-	<int:service-activator id="notifFileServiceActivator" input-channel="lien-file-inbound-channel" ref="lienHandler" method="handleFile"></int:service-activator>
-	
-	<int:channel id="lien-file-inbound-channel">
+	<int:poller id="poller" default="true" fixed-delay="120000" />
+		
+	<int:service-activator id="notifFileServiceActivator" input-channel="lienFileChannel" ref="handler" method="handleFile"></int:service-activator>
+
+	<int:channel id="lienFileChannel">
 		<int:queue />
 	</int:channel>
-	
-	<file:inbound-channel-adapter id="lien-file-inbound" channel="lien-file-inbound-channel" auto-create-directory="true" 
+
+	<file:inbound-channel-adapter id="fileInbound" channel="lienFileChannel" auto-create-directory="true" 
 		directory="file:${fileProcessingDir}${lienDr}${lienInboundDir}" filter="lienFileFilter">
-		<int:poller fixed-rate="1000" />
-	</file:inbound-channel-adapter>	
-	
-		<!--  PQQ Inbound Channel -->
-	<int:channel id="pqqInputFileChannel">
-		<int:queue />
-	</int:channel>
-	
-	<file:inbound-channel-adapter id="pqqFileInbound"
-		channel="pqqInputFileChannel" 
-		filter="pqqFilter" directory="file:${fileProcessingDir}${pqqDir}${pqqInboundDir}">
-		<int:poller fixed-rate="100000" />
+		<int:poller fixed-rate="120000" />
 	</file:inbound-channel-adapter>
-
-	<int:service-activator input-channel="pqqInputFileChannel" ref="pqqHandler" method="handleFile" />
 	
-
-	<!--  Lien Outbound  Channel -->
 	<int:channel id="notificationOutputFileChannel">
 		<int:queue />
 	</int:channel>
 	
-	<file:outbound-channel-adapter id="notificationOutbound" channel="notificationOutputFileChannel"  directory="file:${fileProcessingDir}${lienDr}${lienOutboundDir}">
+	<file:outbound-channel-adapter id="notificationOutbound"
+		channel="notificationOutputFileChannel"
+		directory="file:${fileProcessingDir}${lienDr}${lienOutboundDir}">
+		<int:poller fixed-rate="1000" />
 	</file:outbound-channel-adapter>
 
-
-	<!--  PQQ Outbound  Channel -->
 	<int:channel id="pqqOutputFileChannel">
 		<int:queue />
 	</int:channel>
-	
-	<file:outbound-channel-adapter id="pqqOutbound"  channel="pqqOutputFileChannel"  directory="file:${fileProcessingDir}${pqqDir}${pqqOutboundDir}">
+
+	<file:outbound-channel-adapter id="pqqOutbound" 
+		channel="pqqOutputFileChannel" 
+		directory="file:${fileProcessingDir}${pqqDir}${pqqOutboundDir}">
 	</file:outbound-channel-adapter>
 
-	<beans:bean id="fileMover" class="com.adp.smartconnect.oraclefusion.compgarn.integration.client.FileMover"></beans:bean>
 
-	<beans:bean id="webContentUpload" scope="prototype" class="com.adp.smartconnect.oraclefusion.compgarn.contentupload.WebContentUpload"></beans:bean>
+	<int:channel id="pqqInputFileChannel">
+		<int:queue />
+	</int:channel>
+
+	<file:inbound-channel-adapter id="pqqFileInbound"
+		channel="pqqInputFileChannel" 
+		filter="pqqFilter" directory="file:${fileProcessingDir}${pqqDir}${pqqInboundDir}">
+		<int:poller fixed-rate="120000" />
+	</file:inbound-channel-adapter>
+
+	<int:service-activator input-channel="pqqInputFileChannel" ref="pqqHandler" method="handleFile" />
+	
 
 
 </beans:beans>

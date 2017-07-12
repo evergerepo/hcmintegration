@@ -2,7 +2,7 @@ package com.adp.smartconnect.oraclefusion.compgarn.file.processing;
 
 import java.io.File;
 
-public class LienFileFilter<F> extends EvergeFileListFilter<F>{
+public class LienFileFilter<F> extends FileListFilter<F>{
 	
 	private static String ACCEPTABLE_XTENSIONS = ".txt,.grn";
 	

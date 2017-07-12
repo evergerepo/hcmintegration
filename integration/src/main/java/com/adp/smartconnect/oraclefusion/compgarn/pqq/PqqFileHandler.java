@@ -48,7 +48,7 @@ public class PqqFileHandler {
 
 	private ClientConfigHolder clientConfigurations;
 
-	private ApplicationContext appCtx;
+	private PqqLoadTask pqqLoadTask = new PqqLoadTask();
 	
 	private FileMover fileMover;
 	
@@ -112,8 +112,6 @@ public class PqqFileHandler {
 		data.put("DocId", docID);
 		data.put("TransId", transID);
 		
-		PqqLoadTask pqqLoadTask = (PqqLoadTask)this.appCtx.getBean("pqqLoadTask");
-
 		pqqLoadTask.setUrl(fileDetails.getPqqUrl());
 		pqqLoadTask.setLocale(fileDetails.getPqqLocale());
 		pqqLoadTask.setChunkSizeDownload(-1);
@@ -271,8 +269,6 @@ public class PqqFileHandler {
 			
 
 			// Merge PQFile objects
-			//PQFile que = mergePQFileObjects(responsePartFiles);
-			
 			PQFile pqFile = mergePQQReportResponse(reportResponseList);
 
 			// Create the response file
@@ -398,14 +394,6 @@ public class PqqFileHandler {
 
 	public void setClientConfigurations(ClientConfigHolder clientConfigurations) {
 		this.clientConfigurations = clientConfigurations;
-	}
-
-	public ApplicationContext getAppCtx() {
-		return appCtx;
-	}
-
-	public void setAppCtx(ApplicationContext appCtx) {
-		this.appCtx = appCtx;
 	}
 
 	public FileMover getFileMover() {

@@ -58,8 +58,7 @@ public class WebContentUpload {
 			// replace with relevant URL
 			IdcContext userContext = new IdcContext(this.userName, this.password); 
 			
-			log.info("Username passed in IdcContext " + userName);
-			log.info("Password passed in IdcContext " + password);
+			log.info("IdcContext Username" + userName+", Password:"+password);
 			
 			// "D:\\Suresh\\Oracle_HCM_Fusion\\Automation\\HCC\\Worker.zip",
 			// // Replace with fully

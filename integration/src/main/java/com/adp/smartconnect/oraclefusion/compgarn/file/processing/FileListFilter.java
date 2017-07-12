@@ -7,13 +7,14 @@ import java.nio.file.Files;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.integration.file.filters.AbstractFileListFilter;
 
 import com.adp.smartconnect.oraclefusion.compgarn.config.Configuration;
 
-public class EvergeFileListFilter<F> extends AbstractFileListFilter<F> {
+public class FileListFilter<F> extends AbstractFileListFilter<F> {
 
-	protected static final Logger log = LoggerFactory.getLogger(EvergeFileListFilter.class);
+	protected static final Logger log = LoggerFactory.getLogger(FileListFilter.class);
 	
 	protected Configuration configuration;
 	
@@ -21,9 +22,12 @@ public class EvergeFileListFilter<F> extends AbstractFileListFilter<F> {
 	protected boolean accept(F file) {
 		
 		File f = (File) file;
+		MDC.put("fileName", f.getName());
+		log.info("Input File : ["+f.getAbsolutePath()+"]");
+		
 		
 		if(f.getAbsolutePath().contains(".working") || f.getAbsolutePath().contains(".writing")) {
-			// wait for some time
+			log.warn("File is Working file. Wait for some time to complete process......");
 			return false;
 		}
 		
@@ -76,7 +80,7 @@ public class EvergeFileListFilter<F> extends AbstractFileListFilter<F> {
 		String[] eligibleExtensions = getFileExtensions();
 		boolean shouldFilebeAccepted = false;
 		for(String s : eligibleExtensions) {
-			if(extension.equals(s)) {
+			if(extension.equalsIgnoreCase(s)) {
 				shouldFilebeAccepted = true;
 				break;
 			}
@@ -90,7 +94,7 @@ public class EvergeFileListFilter<F> extends AbstractFileListFilter<F> {
 //		EvergeFileListFilter<File> obj = new EvergeFileListFilter<>();
 //		obj.accept(f);
 		
-		EvergeFileListFilter<File> filter = new LienFileFilter<>();
+	    FileListFilter<File> filter = new LienFileFilter<>();
 		boolean x = filter.shouldFilebeAccepted(f);
 		System.out.println("x is " + x);
 	}
