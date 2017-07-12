@@ -15,9 +15,9 @@ import com.adp.smartconnect.oraclefusion.compgarn.config.Configuration;
 public class ClientConfigHolder {
 
 	public static HashMap<String, ClientConfiguration> clientConfiguration = new HashMap<>();
-	
+
 	private Configuration configuration;
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(ClientConfigHolder.class);
 
 	public static HashMap<String, ClientConfiguration> getClientsConfigurations() {
@@ -27,31 +27,34 @@ public class ClientConfigHolder {
 	public static void setClientConfiguration(HashMap<String, ClientConfiguration> clientConfiguration) {
 		ClientConfigHolder.clientConfiguration = clientConfiguration;
 	}
-	
+
 	public static void addClientConfiguration(String clientName, ClientConfiguration configuration) {
 		clientConfiguration.put(clientName, configuration);
 	}
-	
+
 	public ClientConfiguration getSingleClientData(String client) {
-		if(clientConfiguration.isEmpty()) {
-			loadXmlFileData(); 
+		if (clientConfiguration.isEmpty()) {
+			loadClientProfileXml();
 		}
 		return clientConfiguration.get(client);
 	}
-	
-	private void loadXmlFileData() {
+
+	private void loadClientProfileXml() {
 		try {
-			String notificationPath = configuration.getNotificationPath();			
+			String notificationPath = configuration.getNotificationPath();
 			final File file = new File(notificationPath);
+
+			logger.info("Loading client profiles from :" + notificationPath);
+
 			JAXBContext jaxbContext = JAXBContext.newInstance(ClientConfiguration.class);
 			Unmarshaller jaxbUnMarshaller = jaxbContext.createUnmarshaller();
 			for (final File child : file.listFiles()) {
-				ClientConfiguration configuration = (ClientConfiguration)jaxbUnMarshaller.unmarshal(child);
-				logger.debug("Loading configuration for " + configuration.getClientId());
+				ClientConfiguration configuration = (ClientConfiguration) jaxbUnMarshaller.unmarshal(child);
+				logger.info("Loading configuration for [" + configuration.getClientId() + "]");
 				ClientConfigHolder.addClientConfiguration(configuration.getClientId(), configuration);
 			}
 		} catch (Exception exc) {
-			logger.error("Error in loadXmlFileData ", exc);
+			logger.error("Error loading client profiles loadClientProfileXml() ", exc);
 		}
 	}
 
@@ -62,5 +65,5 @@ public class ClientConfigHolder {
 	public void setConfiguration(Configuration configuration) {
 		this.configuration = configuration;
 	}
-	
+
 }
