@@ -27,6 +27,8 @@ import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
 
 import com.adp.smartconnect.oraclefusion.compgarn.clientConfiguration.ClientConfiguration;
 import com.adp.smartconnect.oraclefusion.compgarn.clientConfiguration.PqqFileDetails;
@@ -398,21 +400,12 @@ public class PqqFileHandler {
 		this.clientConfigurations = clientConfigurations;
 	}
 
-	public PqqLoadTask getPqqLoadTask() {
-		return pqqLoadTask;
+	public ApplicationContext getAppCtx() {
+		return appCtx;
 	}
 
-	public void setPqqLoadTask(PqqLoadTask pqqLoadTask) {
-		this.pqqLoadTask = pqqLoadTask;
-	}
-	
-		public void setClientConfigurations(ClientConfigHolder clientConfigurations) {
-		this.clientConfigurations = clientConfigurations;
-	}
-
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		this.appCtx = applicationContext;		
+	public void setAppCtx(ApplicationContext appCtx) {
+		this.appCtx = appCtx;
 	}
 
 	public FileMover getFileMover() {
