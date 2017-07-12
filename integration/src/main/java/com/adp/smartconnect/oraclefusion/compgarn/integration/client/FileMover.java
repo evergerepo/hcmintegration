@@ -21,40 +21,55 @@ public class FileMover {
 	
 	private static final Logger log = LoggerFactory.getLogger(FileMover.class);
 	
-	public void removeFile(File f) {
-		f.delete();
+	public static void removeFile(File f) {
+		if(f.exists()){
+			f.delete();
+		}
 	}
 	
-	public boolean handleFile(File input, String outputDir) throws IOException {
-		log.info(" Trying to move the file " + input.getName());
+	/*
+	 * Copy file to Output Folder
+	 */
+	public static boolean handleFile(File input, String outputDir) throws IOException {
+		log.info(" Trying to move the file ["+ input.getAbsolutePath()+"] to ["+outputDir+"]");
 		boolean isFileMoved = false;
-		Calendar calendar = Calendar.getInstance();
-		java.util.Date now = calendar.getTime();
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
-		String formattedDate = sdf.format(now);
+		try{
 		
-		String name = input.getName();
-		StringTokenizer tokenizer = new StringTokenizer(name, ".");
-		String extension = null;
-		while(tokenizer.hasMoreTokens()) {
-			extension = tokenizer.nextToken();
+			
+			String name = input.getName();
+			StringTokenizer tokenizer = new StringTokenizer(name, ".");
+			String extension = null;
+			while(tokenizer.hasMoreTokens()) {
+				extension = tokenizer.nextToken();
+			}
+			
+			File f1 = null;
+			
+			// Create directory
+			new File(outputDir).mkdirs();
+			
+			f1 = new File(outputDir + FilenameUtils.removeExtension(input.getName()) + "." + extension);
+	
+			if(input.exists()){
+				Files.copy(input.toPath(), f1.toPath());
+				isFileMoved = true;
+			}else{
+				log.error("Filenot found for moving file  ["+ input.getAbsolutePath()+"] to ["+outputDir+"]");
+			}
+			
+			
+			
+		}catch(Exception e){
+			log.error("Error moving the file  ["+ input.getAbsolutePath()+"] to ["+outputDir+"]");
 		}
-		
-		File f1 = null;
-		
-		// Create directory
-		new File(outputDir).mkdirs();
-		
-		f1 = new File(outputDir + FilenameUtils.removeExtension(input.getName()) + "." + extension);
-
-
-		Files.copy(input.toPath(), f1.toPath());
-		
-		isFileMoved = true;
 		return isFileMoved;
 	}
 	
-	public void mergeFiles(List<File> files, File mergedFile) {
+	
+	/*
+	 * Merge list of files to one File
+	 */
+	public static void mergeFiles(List<File> files, File mergedFile) {
 
 	        FileWriter fstream = null;
 	        BufferedWriter out = null;
@@ -113,8 +128,7 @@ public class FileMover {
 		System.out.println(s);
 		File f1 = new File(s);
 		//Files.copy(input.toPath(), f1.toPath());
-		FileMover fileMOver = new FileMover();
-		fileMOver.removeFile(input);
+		FileMover.removeFile(input);
 	}
 
 }
