@@ -38,8 +38,6 @@ import com.adp.smartconnect.oraclefusion.compgarn.xmltypes.PreQualRecord;
 
 public class PqqFileHandler {
 
-	private PqqLoadTask pqqLoadTask = new PqqLoadTask();
-
 	private static final Logger logger = LoggerFactory.getLogger(PqqFileHandler.class);
 
 	private String clientName = null;
@@ -48,7 +46,9 @@ public class PqqFileHandler {
 
 	private ClientConfigHolder clientConfigurations;
 
+	private ApplicationContext appCtx;
 	
+	private FileMover fileMover;
 	
 	/*
 	 * UTF-8 File generation
@@ -109,6 +109,8 @@ public class PqqFileHandler {
 		data.put("Last Name", lastName);
 		data.put("DocId", docID);
 		data.put("TransId", transID);
+		
+		PqqLoadTask pqqLoadTask = (PqqLoadTask)this.appCtx.getBean("pqqLoadTask");
 
 		pqqLoadTask.setUrl(fileDetails.getPqqUrl());
 		pqqLoadTask.setLocale(fileDetails.getPqqLocale());
@@ -402,6 +404,23 @@ public class PqqFileHandler {
 
 	public void setPqqLoadTask(PqqLoadTask pqqLoadTask) {
 		this.pqqLoadTask = pqqLoadTask;
+	}
+	
+		public void setClientConfigurations(ClientConfigHolder clientConfigurations) {
+		this.clientConfigurations = clientConfigurations;
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.appCtx = applicationContext;		
+	}
+
+	public FileMover getFileMover() {
+		return fileMover;
+	}
+
+	public void setFileMover(FileMover fileMover) {
+		this.fileMover = fileMover;
 	}
 
 }
