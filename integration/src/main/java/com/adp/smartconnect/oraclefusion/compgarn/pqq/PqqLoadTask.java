@@ -1,8 +1,6 @@
 package com.adp.smartconnect.oraclefusion.compgarn.pqq;
 
-import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -13,9 +11,6 @@ import javax.xml.ws.BindingProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import bip_webservice.proxy.AccessDeniedException;
-import bip_webservice.proxy.InvalidParametersException;
-import bip_webservice.proxy.OperationFailedException;
 import bip_webservice.proxy.ReportService;
 import bip_webservice.proxy.ReportService_Service;
 import bip_webservice.proxy.types.ArrayOfParamNameValue;
@@ -124,34 +119,4 @@ public class PqqLoadTask {
 		this.chunkSizeDownload = chunkSizeDownload;
 	}
 	
-	public static void main(String[] args) throws AccessDeniedException, InvalidParametersException, OperationFailedException, IOException {
-		
-		System.setProperty("com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump", "true");
-		System.setProperty("com.sun.xml.internal.ws.transport.http.client.HttpTransportPipe.dump", "true");
-		System.setProperty("com.sun.xml.ws.transport.http.HttpAdapter.dump", "true");
-		System.setProperty("com.sun.xml.internal.ws.transport.http.HttpAdapter.dump", "true");
-		System.setProperty("com.sun.xml.internal.ws.transport.http.HttpAdapter.dumpTreshold", "999999");
-		
-		
-		Map<String, String> data = new HashMap<String, String>();
-		data.put("SSN", "199990013");
-		data.put("SSNFormatted", "199-99-0013");
-		data.put("First Name", "Natalie");
-		data.put("Last Name", "Portman");
-		data.put("DocId", "GS118268481");
-		data.put("TransId", "123");
-
-		try{
-		PqqLoadTask task = new PqqLoadTask();
-		task.setUrl("https://ecbfdev4-test.fs.us8.oraclecloud.com/xmlpserver/services/v2/ReportService?wsdl");
-		
-		//task.callRunReport("/Custom/Human Capital Management/Reports/Payroll/PQQ/PQQ Report.xdo", data, "HCMUser", "Cloud2World!", "xml", null, "/Users/abhisheksingh/ddrive/everge_ws/details/BIP/Report_2.xml");
-
-		task.callRunReport("/Custom/ADP Comp Garn/PQQv1.25 Report.xdo", data, "ADP_Connect", "ah2lB}A8wj05", "xml", null);
-		//task.callRunReport("/Custom/ADP Comp Garn/PQQv1.25 Report.xdo", data, "pushparaj.dharmaraj", "Welcome123", "xml", null, "/Users/abhisheksingh/ddrive/everge_ws/details/Report_2.xml");
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-	}
-
 }
