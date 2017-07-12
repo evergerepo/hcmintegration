@@ -134,14 +134,6 @@ public class WebContentUpload {
 		}
 	}
 	
-	public static void main(String[] args) throws IdcClientException, FileNotFoundException, IllegalArgumentException {
-		//WebContentUpload upload = new WebContentUpload("https://hcwh-test.fs.ap1.oraclecloud.com/cs/idcplg", "HCMUSER", "Cloud2World!");
-		//WebContentUpload upload = new WebContentUpload("https://hcoz-test.fs.us2.oraclecloud.com/cs/idcplg", "HCMUSER", "Cloud2World!");
-		WebContentUpload upload = new WebContentUpload("https://ecbfdev4-test.fs.us8.oraclecloud.com/cs/idcplg", "ADP_Connect", "ah2lB}A8wj05");
-		System.out.println("Urls is idcplg");
-		upload.uploadContent("/Users/abhisheksingh/ddrive/everge_ws/test/taxLevyRecords-Write.txt");
-	}
-
 	public String getClientUrl() {
 		return clientUrl;
 	}
