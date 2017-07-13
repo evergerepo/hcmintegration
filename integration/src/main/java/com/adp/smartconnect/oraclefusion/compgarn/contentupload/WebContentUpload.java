@@ -14,8 +14,6 @@ import org.slf4j.LoggerFactory;
 import oracle.stellent.ridc.IdcClient;
 import oracle.stellent.ridc.IdcClientException;
 import oracle.stellent.ridc.IdcClientManager;
-import oracle.stellent.ridc.IdcClientProfile;
-import oracle.stellent.ridc.IdcClientProvider;
 import oracle.stellent.ridc.IdcContext;
 import oracle.stellent.ridc.model.DataBinder;
 import oracle.stellent.ridc.model.TransferFile;
@@ -41,7 +39,8 @@ public class WebContentUpload {
 		this.password = password;
 	}
 
-	public String uploadContent(String path) throws IdcClientException, FileNotFoundException, IllegalArgumentException {
+	@SuppressWarnings("rawtypes")
+	public String uploadContent(String path) throws IdcClientException, FileNotFoundException, IllegalArgumentException, Exception {
 		String contentId = "UCM";
 		try {
 			
@@ -53,12 +52,11 @@ public class WebContentUpload {
 			contentId = contentId + formattedDate;
 			log.info("Content ID:" + contentId);
 			IdcClient idcClient = m_clientManager.createClient(this.clientUrl);
-			IdcClientProvider provider = null;
 			
 			// replace with relevant URL
 			IdcContext userContext = new IdcContext(this.userName, this.password); 
 			
-			log.info("IdcContext Username" + userName+", Password:"+password);
+			log.info("IdcContext Username:" + userName+", Password:"+password);
 			
 			// "D:\\Suresh\\Oracle_HCM_Fusion\\Automation\\HCC\\Worker.zip",
 			// // Replace with fully
@@ -71,9 +69,10 @@ public class WebContentUpload {
 					"FAFusionImportExport", // security group
 					"hcm$/dataloader$/import$", // account
 					contentId);// dDocName - this is the ContentId ;
-			log.info("Upload is successful: " + contentId);
+			
+			log.info("Lien Notification file Upload is successful: ContentId:" + contentId);
 		} catch (Exception e) {
-			log.error("uploadContent ",e);
+			log.error("Lien Notification file Upload error. Message:"+e.getMessage(),e);
 			throw e;
 		}
 
@@ -88,9 +87,10 @@ public class WebContentUpload {
 	 * * @param dDocName dDocName * * @throws IdcClientException
 	 * @throws FileNotFoundException 
 	 */
+	@SuppressWarnings("rawtypes")
 	public void checkin(IdcClient idcClient, IdcContext userContext, String sourceFileFQP, String contentType,
 			String dDocTitle, String dDocAuthor, String dSecurityGroup, String dDocAccount, String dDocName)
-			throws IdcClientException, FileNotFoundException {
+			throws Exception {
 		InputStream is = null;
 		try {
 			String fileName = sourceFileFQP.substring(sourceFileFQP.lastIndexOf('/') + 1);
@@ -117,12 +117,11 @@ public class WebContentUpload {
 			
 			// execute the request
 			ServiceResponse response = idcClient.sendRequest(userContext, request); 
-
-			DataBinder responseBinder = response.getResponseAsBinder();
+			log.info("Lien Notification file Upload response: " + response.getResponseAsString());
 			
 		} catch (Exception e) {
-			log.error("uploadContent ",e);
-			throw e;
+			log.error("Lien Notification file Upload Error. Message: "+e.getMessage(),e);
+			throw new IdcClientException(e);
 		} finally {
 			if (is != null) {
 				try {

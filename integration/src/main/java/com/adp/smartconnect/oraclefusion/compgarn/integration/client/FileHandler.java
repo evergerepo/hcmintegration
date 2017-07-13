@@ -94,7 +94,7 @@ public class FileHandler implements ApplicationContextAware {
 		
 	}
 	
-	private String uploadFileToContentServer(File file, ClientConfiguration config) throws FileNotFoundException, IllegalArgumentException, IdcClientException {
+	private String uploadFileToContentServer(File file, ClientConfiguration config) throws FileNotFoundException, IllegalArgumentException, Exception {
 		
 		WebContentUploadDetails uploadDtl = config.getWebContentUploadDtl();
 		WebContentUpload upload = (WebContentUpload)this.appCtx.getBean("webContentUpload");
