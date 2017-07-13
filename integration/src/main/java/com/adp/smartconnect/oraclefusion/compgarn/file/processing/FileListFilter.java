@@ -46,7 +46,7 @@ public class FileListFilter<F> extends AbstractFileListFilter<F> {
 			Files.copy(file.toPath(), newFile.toPath());
 			removeFile(file);
 		} catch (IOException e) {
-			log.error("Error while moving the file to error directory",e);
+			log.error("Error while moving the file to error directory. ",e);
 		}
 
 	}
@@ -58,7 +58,6 @@ public class FileListFilter<F> extends AbstractFileListFilter<F> {
 
 		File fl = new File(fullName);
 		if(fl.exists()) {
-			
 			log.error("The file has already been processed.");
 			removeFile(fl);
 			return true;

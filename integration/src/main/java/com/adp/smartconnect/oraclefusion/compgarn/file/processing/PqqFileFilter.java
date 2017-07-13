@@ -14,21 +14,20 @@ public class PqqFileFilter<F> extends FileListFilter<F>{
 	@Override
 	protected boolean accept(F file) {
 		File f = (File) file;
-		if(super.accept(file)){
-			return true;
+		if(super.accept(file)==false){
+			return false;
 		}
 		
 		if(shouldFilebeAccepted(f)) {
-			
 			boolean doesFileExist = isFileExisting(configuration.getFileProcessingDir() + configuration.getPqqDir() + configuration.getPqqArchiveDir(), f.getName());
 			if(doesFileExist){
-				//No need to process
+				log.warn("Input file in archive dir, stop processing file."+f.getAbsolutePath());
 				return false;
 			}
 			return true;
 		}else {
-			log.error("PQQ file is blocked from further processing " + f.getAbsolutePath());
-			moveToErrorDir(configuration.getLienErrorDir(), f);
+			log.error("File patten is not matched, move file to error folder. :" + f.getAbsolutePath());
+			moveToErrorDir(configuration.getFileProcessingDir()+configuration.getPqqDir()+configuration.getPqqErrorDir(), f);
 			return false;
 		}
 		

@@ -10,18 +10,19 @@ public class LienFileFilter<F> extends FileListFilter<F>{
 	protected boolean accept(F file) {
 				
 		File f = (File) file;
-		if(super.accept(file)){
-			return true;
+		if(super.accept(file)==false){
+			return false;
 		}
 		
 		if (shouldFilebeAccepted(f)) {
 			boolean doesFileExist = isFileExisting(configuration.getFileProcessingDir() + configuration.getLienArchiveDir(), f.getName());
 			if(doesFileExist){
-				//No need to process
+				log.warn("Input file in archive dir, stop processing file."+f.getAbsolutePath());
 				return false;
 			}
 			return true;
 		} else {
+			log.error("File patten is not matched, move file to error folder. :" + f.getAbsolutePath());
 			moveToErrorDir(configuration.getLienErrorDir(), f);
 			return false;
 		}
