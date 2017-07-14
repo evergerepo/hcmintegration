@@ -59,15 +59,17 @@
 		<beans:property name="configuration" ref="config"></beans:property>
 		<beans:property name="clientConfigurations" ref="clientConfigurations"></beans:property>
 		<beans:property name="notifEngine" ref="notifEngine"></beans:property>
-		<beans:property name="fileMover" ref="fileMover"></beans:property>
+		<beans:property name="webContentUpload" ref="webContentUpload"></beans:property>
+		<beans:property name="batchLoadTask" ref="batchLoadTask"></beans:property>
 	</beans:bean>
 	
 	<beans:bean id="fileMover" class="com.adp.smartconnect.oraclefusion.compgarn.integration.client.FileMover"></beans:bean>
 	
-	<beans:bean id="webContentUpload" scope="prototype" class="com.adp.smartconnect.oraclefusion.compgarn.contentupload.WebContentUpload"></beans:bean>
+	<beans:bean id="webContentUpload"  class="com.adp.smartconnect.oraclefusion.compgarn.contentupload.WebContentUpload">
+	</beans:bean>
 	
 	
-	<beans:bean id="loadTask" scope="prototype" class="com.adp.smartconnect.oraclefusion.compgarn.batchloader.impl.BatchLoadTask">
+	<beans:bean id="batchLoadTask" class="com.adp.smartconnect.oraclefusion.compgarn.batchloader.impl.BatchLoadTask">
 		<beans:property name="clientConfigurations" ref="clientConfigurations"></beans:property>
 	</beans:bean>
 	
@@ -86,7 +88,7 @@
 	<beans:bean id="pqqHandler" class="com.adp.smartconnect.oraclefusion.compgarn.pqq.PqqFileHandler">
 		<beans:property name="configuration" ref="config"></beans:property>
 		<beans:property name="clientConfigurations" ref="clientConfigurations"></beans:property>
-		<beans:property name="fileMover" ref="fileMover"></beans:property>
+		
 	</beans:bean>
 	
 	

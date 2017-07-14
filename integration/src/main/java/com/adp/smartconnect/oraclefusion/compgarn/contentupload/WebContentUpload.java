@@ -23,24 +23,13 @@ public class WebContentUpload {
 	
 	private static final Logger log = LoggerFactory.getLogger(WebContentUpload.class);
 	
-	private String clientUrl;
 	
-	private String userName;
-	
-	private String password;
-	
-	public WebContentUpload() {
-		//
-	}
-	
-	public WebContentUpload(String clientUrl, String userName, String password) {
-		this.clientUrl = clientUrl;
-		this.userName = userName;
-		this.password = password;
-	}
-
+/*
+ * Upload Lien file to Content Server
+ */
 	@SuppressWarnings("rawtypes")
-	public String uploadContent(String path) throws IdcClientException, FileNotFoundException, IllegalArgumentException, Exception {
+	public String uploadContent(String clientUrl, String userName, String password, String path) 
+			throws IdcClientException, FileNotFoundException, IllegalArgumentException, Exception {
 		String contentId = "UCM";
 		try {
 			
@@ -50,18 +39,16 @@ public class WebContentUpload {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
 			String formattedDate = sdf.format(now);
 			contentId = contentId + formattedDate;
+			
 			log.info("Content ID:" + contentId);
-			IdcClient idcClient = m_clientManager.createClient(this.clientUrl);
+			
+			IdcClient idcClient = m_clientManager.createClient(clientUrl);
 			
 			// replace with relevant URL
-			IdcContext userContext = new IdcContext(this.userName, this.password); 
+			IdcContext userContext = new IdcContext(userName, password); 
 			
-			log.info("IdcContext Username:" + userName+", Password:"+password);
+			log.info("IdcContext Username:" + userName+", Password:"+password+", URL:"+clientUrl);
 			
-			// "D:\\Suresh\\Oracle_HCM_Fusion\\Automation\\HCC\\Worker.zip",
-			// // Replace with fully
-			// qualified path to source
-			// file
 			checkin(idcClient, userContext, path,
 					"Document", // content type
 					"Testing", // doc title
@@ -117,7 +104,7 @@ public class WebContentUpload {
 			
 			// execute the request
 			ServiceResponse response = idcClient.sendRequest(userContext, request); 
-			log.info("Lien Notification file Upload response: " + response.getResponseAsString());
+			log.debug("Lien Notification file upload response: " + response.getResponseAsString());
 			
 		} catch (Exception e) {
 			log.error("Lien Notification file Upload Error. Message: "+e.getMessage(),e);
@@ -132,28 +119,5 @@ public class WebContentUpload {
 		}
 	}
 	
-	public String getClientUrl() {
-		return clientUrl;
-	}
-
-	public void setClientUrl(String clientUrl) {
-		this.clientUrl = clientUrl;
-	}
-
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
 
 }

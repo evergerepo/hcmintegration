@@ -3,8 +3,10 @@ package com.adp.smartconnect.oraclefusion.compgarn.controller;
 import java.io.File;
 import java.util.Map;
 
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,19 +25,19 @@ import com.adp.smartconnect.oraclefusion.compgarn.listeners.ClientConfigHolder;
 public class LienNotificationController {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(LienNotificationController.class);
-	private static final String SUCESS = "Sucess";
-	
-	
 	
 	/**
 	 * This service is used to re-loading client profiles
 	 */
-	@RequestMapping(path = "/ridcFileUpload", method = {RequestMethod.POST}, produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody String ridcFileUpload(@RequestBody Map<String, String> files) {
+	@RequestMapping(path = "/uploadLienContent", method = {RequestMethod.POST}, produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody String uploadLienContent(@RequestBody Map<String, String> files) {
 		String fileName = files.get("fileName");
+		String contentId = null;
 		try{
-			LOGGER.info("ridcFileUpload Start. File Name:"+fileName);
+			LOGGER.info("uploadLienContent Start. File Name:"+fileName);
 			File file = new File(fileName);
+			MDC.put("transId", file.getName());
+			
 			String clientId = file.getName().substring(0, 4).toLowerCase();
 			ClientConfiguration config = clientConfigurations.getSingleClientData(clientId);
 			LOGGER.info("Client Id:"+clientId+", ClientConfiguration:"+config);
@@ -44,17 +46,41 @@ public class LienNotificationController {
 			}
 			
 			WebContentUploadDetails uploadDtl = config.getWebContentUploadDtl();
-			WebContentUpload upload = new WebContentUpload(uploadDtl.getWebContentUrl(), uploadDtl.getWebContentUserName(), uploadDtl.getWebContentPwd());
+			WebContentUpload upload = new WebContentUpload();
 			
-			String response = upload.uploadContent(fileName);
-			LOGGER.info("ridcFileUpload Complete. Response:"+response);
+			contentId = upload.uploadContent(uploadDtl.getWebContentUrl(), uploadDtl.getWebContentUserName(), uploadDtl.getWebContentPwd(), fileName);
+			
+			LOGGER.info("uploadLienContent Complete. Response:"+contentId);
 		}catch(Exception e){
-			LOGGER.info("ridcFileUpload) ERROR. Message:"+e.getMessage(), e);
+			LOGGER.info("uploadLienContent ERROR. Message:"+e.getMessage(), e);
 			return e.getMessage();
 		}
-		return SUCESS;
+		MDC.clear();
+		return contentId;
 	}
 	
+	
+	
+	/**
+	 * This service is used to re-loading client profiles
+	 */
+	@RequestMapping(path = "/invokeSubmitFlow", method = {RequestMethod.POST}, produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody String invokeSubmitFlow(@RequestBody Map<String, String> data) {
+		String contentId = data.get("contentId");
+		String clientId  = data.get("clientId");
+		String flowName  = data.get("flowName");
+		try{
+			LOGGER.info("invokeSubmitFlow Start. Request:"+ReflectionToStringBuilder.toString(data));
+			MDC.put("transId", contentId);
+			
+			LOGGER.info("invokeSubmitFlow Complete. Response:"+contentId);
+		}catch(Exception e){
+			LOGGER.info("invokeSubmitFlow ERROR. Message:"+e.getMessage(), e);
+			return e.getMessage();
+		}
+		MDC.clear();
+		return contentId;
+	}
 	
 	
 	@Autowired private ClientConfigHolder clientConfigurations;

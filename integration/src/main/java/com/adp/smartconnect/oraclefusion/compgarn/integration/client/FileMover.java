@@ -124,7 +124,6 @@ public class FileMover {
 		File input = new File("/Users/abhisheksingh/ddrive/everge_ws/pqqResp/TEST.PQQ");
 		String s = archiveLocation + FilenameUtils.removeExtension(input.getName()) + ".PQQ";
 		System.out.println(s);
-		File f1 = new File(s);
 		//Files.copy(input.toPath(), f1.toPath());
 		FileMover.removeFile(input);
 	}

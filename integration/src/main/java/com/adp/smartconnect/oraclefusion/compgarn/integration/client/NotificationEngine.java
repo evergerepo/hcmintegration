@@ -1,7 +1,6 @@
 package com.adp.smartconnect.oraclefusion.compgarn.integration.client;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 

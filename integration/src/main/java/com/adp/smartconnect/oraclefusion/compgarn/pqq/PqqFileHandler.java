@@ -27,8 +27,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
 
 import com.adp.smartconnect.oraclefusion.compgarn.clientConfiguration.ClientConfiguration;
 import com.adp.smartconnect.oraclefusion.compgarn.clientConfiguration.PqqFileDetails;
@@ -49,8 +47,6 @@ public class PqqFileHandler {
 	private ClientConfigHolder clientConfigurations;
 
 	private PqqLoadTask pqqLoadTask = new PqqLoadTask();
-	
-	private FileMover fileMover;
 	
 	/*
 	 * UTF-8 File generation
@@ -199,12 +195,16 @@ public class PqqFileHandler {
 		
 		try {
 			String fileName = input.getName();
-			MDC.put("fileName", fileName);
+			MDC.put("transId", fileName);
 			logger.info("PQQ File processing STARTED. File Name: " + input.getAbsolutePath());
 
 			clientName = fileName.substring(0, 4).toLowerCase();
 			logger.info("The client id in Pqq is :" + clientName);
 			ClientConfiguration config = clientConfigurations.getSingleClientData(clientName);
+			if(config==null){
+				logger.error("ClientConfiguration set-up is missing. Client Id:"+clientName);
+				return null;
+			}
 
 			// Check if the file is getting processed
 			String inboundFileBaseName = FilenameUtils.getBaseName(fileName);
@@ -218,7 +218,7 @@ public class PqqFileHandler {
 
 			
 			if (inProcessingFile.exists() || doneFile.exists()) {
-				logger.warn("Processing/Done file found, stop processing file.");;
+				logger.warn("Processing/Done file found, stop processing file.");
 				return null;
 			}
 			
@@ -332,45 +332,6 @@ public class PqqFileHandler {
 		return outputFile;
 	}
 
-	public static void main(String[] args) throws IOException, JAXBException {
-
-		// String str = "XXX1MMDDYYYYHHMMSS.PREQ.PQQ";
-		// System.out.println(str.substring(0, 3));
-		//
-		// System.setProperty("com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump",
-		// "true");
-		// System.setProperty("com.sun.xml.internal.ws.transport.http.client.HttpTransportPipe.dump",
-		// "true");
-		// System.setProperty("com.sun.xml.ws.transport.http.HttpAdapter.dump",
-		// "true");
-		// System.setProperty("com.sun.xml.internal.ws.transport.http.HttpAdapter.dump",
-		// "true");
-		// System.setProperty("com.sun.xml.internal.ws.transport.http.HttpAdapter.dumpTreshold",
-		// "65673576543765467537");
-		//
-		// String path =
-		// FileHandler.class.getClassLoader().getResource("").getPath();
-		// String fullPath = URLDecoder.decode(path, "UTF-8");
-		// final File file = new File(path + "com/everge/clientConfigurations");
-		// JAXBContext jaxbContext =
-		// JAXBContext.newInstance(ClientConfiguration.class);
-		// Unmarshaller jaxbUnMarshaller = jaxbContext.createUnmarshaller();
-		// for (final File child : file.listFiles()) {
-		// ClientConfiguration configuration =
-		// (ClientConfiguration)jaxbUnMarshaller.unmarshal(child);
-		// ApplicationContextReferencer.addClientConfiguration(configuration.getClientName(),
-		// configuration);
-		// }
-
-		PqqFileHandler handler = new PqqFileHandler();
-
-		File input = new File("/Users/abhisheksingh/ddrive/everge_ws/test/1.PQQ");
-		JAXBContext jaxbContext = JAXBContext.newInstance(PQFile.class);
-		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-
-		PQFile file = (PQFile) jaxbUnmarshaller.unmarshal(input);
-
-	}
 
 	public String getClientName() {
 		return clientName;
@@ -396,12 +357,5 @@ public class PqqFileHandler {
 		this.clientConfigurations = clientConfigurations;
 	}
 
-	public FileMover getFileMover() {
-		return fileMover;
-	}
-
-	public void setFileMover(FileMover fileMover) {
-		this.fileMover = fileMover;
-	}
 
 }

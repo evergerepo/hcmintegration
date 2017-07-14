@@ -24,6 +24,8 @@ public class LienFileFilter<F> extends FileListFilter<F>{
 		} else {
 			log.error("File patten is not matched, move file to error folder. :" + f.getAbsolutePath());
 			moveToErrorDir(configuration.getLienErrorDir(), f);
+			moveToErrorDir(configuration.getFileProcessingDir()+configuration.getLienDr()+configuration.getLienErrorDir(), f);
+			
 			return false;
 		}
 	}

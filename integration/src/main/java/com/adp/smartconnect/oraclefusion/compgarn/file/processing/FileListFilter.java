@@ -2,7 +2,9 @@ package com.adp.smartconnect.oraclefusion.compgarn.file.processing;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
@@ -22,7 +24,7 @@ public class FileListFilter<F> extends AbstractFileListFilter<F> {
 	protected boolean accept(F file) {
 		
 		File f = (File) file;
-		MDC.put("fileName", f.getName());
+		MDC.put("transId", f.getName());
 		log.info("Input File : ["+f.getAbsolutePath()+"]");
 		
 		
@@ -43,7 +45,11 @@ public class FileListFilter<F> extends AbstractFileListFilter<F> {
 		
 		File newFile = new File(errorDir + file.getName());
 		try {
-			Files.copy(file.toPath(), newFile.toPath());
+			CopyOption[] options = new CopyOption[]{
+				      StandardCopyOption.REPLACE_EXISTING,
+				      StandardCopyOption.COPY_ATTRIBUTES
+				    }; 
+			Files.copy(file.toPath(), newFile.toPath(), options);
 			removeFile(file);
 		} catch (IOException e) {
 			log.error("Error while moving the file to error directory. ",e);
