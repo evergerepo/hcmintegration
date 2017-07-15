@@ -71,6 +71,7 @@
 	
 	<beans:bean id="batchLoadTask" class="com.adp.smartconnect.oraclefusion.compgarn.batchloader.impl.BatchLoadTask">
 		<beans:property name="clientConfigurations" ref="clientConfigurations"></beans:property>
+		<beans:property name="configuration" ref="config"></beans:property>
 	</beans:bean>
 	
 	<beans:bean id="pqqLoadTask" scope="prototype" class="com.adp.smartconnect.oraclefusion.compgarn.pqq.PqqLoadTask">

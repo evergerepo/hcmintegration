@@ -25,18 +25,20 @@ public class NotificationEngine {
 	private ClientConfigHolder clientConfigurations;
 	
 	private static final Logger logger = LoggerFactory.getLogger(NotificationEngine.class);
-					
+
+	/*
+	 * Batch Notification Flow
+	 */
 	public void invokeBatchNotificationFlow(String dirName, List<String> batchNames, String clientName) throws Exception {
 
 		// Retrieve Client Configuration
 		ClientConfiguration clientConfiguration = clientConfigurations.getSingleClientData(clientName);
 		NotificationJobDtl config = clientConfiguration.getNotificationJobDtl();
 
-		String notificationInpDir = configuration.getFileProcessingDir() + configuration.getLienDr()
-				+ configuration.getLienOutboundDir();
+		String notificationInpDir = configuration.getFileProcessingDir() + configuration.getLienDr()+ configuration.getLienOutboundDir();
 		logger.info("Notification Input Directory is " + notificationInpDir);
 		String notificationReportLocation = config.getNotificationReportPath();
-
+		
 		for (String name : batchNames) {
 			invokeNotificationFlow(clientConfiguration, name, notificationInpDir, notificationReportLocation, clientName);
 		}

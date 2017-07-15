@@ -40,14 +40,14 @@ public class WebContentUpload {
 			String formattedDate = sdf.format(now);
 			contentId = contentId + formattedDate;
 			
-			log.info("Content ID:" + contentId);
+			log.info("ContentUpload ContentId:" + contentId);
 			
 			IdcClient idcClient = m_clientManager.createClient(clientUrl);
 			
 			// replace with relevant URL
 			IdcContext userContext = new IdcContext(userName, password); 
 			
-			log.info("IdcContext Username:" + userName+", Password:"+password+", URL:"+clientUrl);
+			log.debug("ContentUpload: Username:" + userName+", Password:"+password+", URL:"+clientUrl);
 			
 			checkin(idcClient, userContext, path,
 					"Document", // content type
@@ -57,9 +57,9 @@ public class WebContentUpload {
 					"hcm$/dataloader$/import$", // account
 					contentId);// dDocName - this is the ContentId ;
 			
-			log.info("Lien Notification file Upload is successful: ContentId:" + contentId);
+			log.info("Lien Notification file Upload is successful. ContentId:" + contentId);
 		} catch (Exception e) {
-			log.error("Lien Notification file Upload error. Message:"+e.getMessage(),e);
+			log.error("Lien Notification file Upload ERROR. Message:"+e.getMessage(),e);
 			throw e;
 		}
 
@@ -79,6 +79,7 @@ public class WebContentUpload {
 			String dDocTitle, String dDocAuthor, String dSecurityGroup, String dDocAccount, String dDocName)
 			throws Exception {
 		InputStream is = null;
+		
 		try {
 			String fileName = sourceFileFQP.substring(sourceFileFQP.lastIndexOf('/') + 1);
 			is = new FileInputStream(sourceFileFQP);

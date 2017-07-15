@@ -3,9 +3,7 @@ package com.adp.smartconnect.oraclefusion.compgarn.integration.client;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,96 +34,18 @@ public class FileHandler  {
 	private NotificationEngine notifEngine;
 	private BatchLoadTask batchLoadTask;
 	
-	
 
-	/**
-	 * Before sending the file over to Oracle Content Server, header and footer from the file 
-	 * has to be stripped of. This is what this method does.
-	 * @param inputFile
-	 * @param fileName
-	 * @param directory
-	 * @throws IOException
-	 */
-	public void createStrippedFile(File inputFile, String fileName, String directory) throws IOException {
-		// Strip off header and footer.
-		Scanner fileScanner = new Scanner(inputFile);
-		
-		new File(directory).mkdirs();
-		java.io.FileWriter fileStream = new java.io.FileWriter(directory + fileName);
-		BufferedWriter out = new BufferedWriter(fileStream);
-		int i = 0;
-		
-		while(fileScanner.hasNextLine()) {
-		    String next = fileScanner.nextLine();
-		    logger.debug("next is " + next);
-		    if(i == 0){
-		    	i++;
-		    	continue;
-		    }
-		    
-		    if(next.equals("\n")) {
-		    	out.newLine();
-		    }else if (fileScanner.hasNextLine()) {
-		    	logger.debug("Writing next is " + next);
-		    	 out.write(next);
-		    	 out.newLine(); 
-		    }   
-		}
 
-		out.close();
-		fileStream.close();
-		fileScanner.close();
-		
-	}
-	
-
-	/*
-	 * Invoke Submit Flow, after that Status Check
-	 */
-	private List<String> invokeSubmitFlowAndCheckOnStatus(String contentId, ClientConfiguration config,  String clientId) throws Exception {
-		
-		List<String> batchNames = new ArrayList<>();
-		NotificationJobDtl jobDtl = config.getNotificationJobDtl();
-
-		//Invoke Submit Flow
-		Map<String, String> batchData = invokeSubmitFlow(contentId, jobDtl.getLienInfoTransformationFormula(), clientId);
-		logger.info("Submit Flow Response:"+ ReflectionToStringBuilder.toString(batchData));
-		
-		//Get Submit FLow Status
-		String flowInstanceName = batchData.get("flowInstanceName");
-		String batchName = batchData.get("batchName");
-		Map<String, String> flowStatusResponse = getSubmitFlowStatusForBatch(flowInstanceName, jobDtl.getLegislativeDataGroupName(), clientId);
-		logger.info("The flow status response for  contentId ["+contentId+"] and the batch name ["+ batchName +"] is " + flowStatusResponse);
-		
-		// Invoke notification flow for the files for which load is successful
-		String batchLoadStatus = flowStatusResponse.get("batchload");
-		if(batchLoadStatus.equalsIgnoreCase("SUCCESS")) {
-			Map<String, String> addntlInfoBatchData = invokeSubmitFlow(contentId, jobDtl.getLienAddntlInfoTransformationFormula(), clientId);
-			String addntlInfoFlowInstanceName = addntlInfoBatchData.get("flowInstanceName");
-			String addntlInfoBatchName = addntlInfoBatchData.get("batchName");
-			
-			Map<String, String> addntlInfoFlowStatusResponse = getSubmitFlowStatusForBatch(addntlInfoFlowInstanceName, jobDtl.getLegislativeDataGroupName(), clientId);
-			logger.info("addntlInfoFlowInstanceName:The flow status response for contentId ["+contentId+"] and the batch name ["+ addntlInfoBatchName +"] is " 
-												+ addntlInfoFlowStatusResponse);
-			
-			batchNames.add(batchName);
-		}
-		
-		return batchNames;
-
-	}
-	
-	private String getFileName(File input) {
-		return input.getName();
-	}
-	
-	private String getClientId(String fileName) {
-		return fileName.substring(0, 4).toLowerCase();
-	}
-
-	
 	/*
 	 * Handle Input Lien Notification File
+	 * 1. Strip Header/Footer in file
+	 * 2. Upload Lien file to Content Server
+	 * 3. Trigger Run flow using Content Id and BatchName
+	 * 4. Check 'Load Batch' Status
+	 * 5. Check 'Transfer Batch' status
+	 * Repeat 3,4 and 5 steps for multiple events.
+	 * 6. Run Notification Report
+	 * 
 	 */
 	public File handleFile(File inputFile) throws Exception {
 		
@@ -163,27 +83,30 @@ public class FileHandler  {
 		
 		// Create in processing file
 		inProcessingFile.createNewFile();
-				
-				
-		//Remove header and footer and copy file to work dir
-		String directory = configuration.getFileProcessingDir() + configuration.getLienDr() + configuration.getLienWorkDir();
-		createStrippedFile(inputFile, fileName, directory);
-		String absoluteStrippedFileName = directory.concat(fileName);
-		
-		final File strippedWorkFile = new File(absoluteStrippedFileName);
-		logger.info("Lien header stripped file name: "+ strippedWorkFile.getAbsolutePath());
-		
-	   
+
 		try {
-			// Upload the file to the content server
+			
+			//Step1. Remove header and footer and copy file to work dir
+			String directory = configuration.getFileProcessingDir() + configuration.getLienDr() + configuration.getLienWorkDir();
+			createStrippedFile(inputFile, fileName, directory);
+			String absoluteStrippedFileName = directory.concat(fileName);
+			final File strippedWorkFile = new File(absoluteStrippedFileName);
+			logger.info("STEP1: Lien file stripping completed. File Name: "+ strippedWorkFile.getAbsolutePath());
+			
+			
+			// Step2 : Upload the file to the content server
 			WebContentUploadDetails uploadDtl = config.getWebContentUploadDtl();
 			String contentId  = webContentUpload.uploadContent(uploadDtl.getWebContentUrl(), uploadDtl.getWebContentUserName(), 
 					uploadDtl.getWebContentPwd(), strippedWorkFile.getAbsolutePath());
+			logger.info("STEP2: Upload Lien file to Content Server completd. ContentId: "+contentId);
 			
-			//Check status for 'Load Batch' and 'Transfer Batch'
-			List<String> batchNames = invokeSubmitFlowAndCheckOnStatus(contentId, config, clientId);
 			
-			// Invoke the notification flow
+			//Step 3,4,5:Trigger Run flow and Check status for 'Load Batch' and 'Transfer Batch'
+			List<String> batchNames = processSubmitFlowAndCheckOnStatus(contentId, config, clientId);
+			
+			
+			
+			// Step 6: Invoke the notification flow (Run Notification Report)
 			if(!batchNames.isEmpty()) {			
 				notifEngine.invokeBatchNotificationFlow(dirName, batchNames, clientId);		
 			}
@@ -205,6 +128,106 @@ public class FileHandler  {
 		return null;
 	}
 	
+	
+	
+	
+
+	/**
+	 * Before sending the file over to Oracle Content Server, header and footer from the file 
+	 * has to be stripped of. This is what this method does.
+	 * @param inputFile
+	 * @param fileName
+	 * @param directory
+	 * @throws IOException
+	 */
+	public void createStrippedFile(File inputFile, String fileName, String directory) throws IOException {
+		// Strip off header and footer.
+		Scanner fileScanner = new Scanner(inputFile);
+		
+		logger.info("Strip off header and footer in Lien File");
+		
+		new File(directory).mkdirs();
+		java.io.FileWriter fileStream = new java.io.FileWriter(directory + fileName);
+		BufferedWriter out = new BufferedWriter(fileStream);
+		int i = 0;
+		
+		while(fileScanner.hasNextLine()) {
+		    String next = fileScanner.nextLine();
+		    logger.debug("next is " + next);
+		    if(i == 0){
+		    	i++;
+		    	continue;
+		    }
+		    
+		    if(next.equals("\n")) {
+		    	out.newLine();
+		    }else if (fileScanner.hasNextLine()) {
+		    	logger.debug("Writing next is " + next);
+		    	 out.write(next);
+		    	 out.newLine(); 
+		    }   
+		}
+
+		out.close();
+		fileStream.close();
+		fileScanner.close();
+		
+	}
+	
+
+	/*
+	 * Trigger Run flow using Content Id and BatchName, and invoke Check Load and Transfer Batch status 
+	 * Repeat this for 'LienInfoTransformation' and 'LienAddntlInfoTransformation' steps
+	 */
+	private List<String> processSubmitFlowAndCheckOnStatus(String contentId, ClientConfiguration config,  String clientId) throws Exception {
+		logger.info("invokeSubmitFlowAndCheckOnStatus START. contentId:"+contentId);
+		
+		List<String> batchNames = new ArrayList<>();
+		NotificationJobDtl jobDtl = config.getNotificationJobDtl();
+
+	
+		//Invoke Submit Flow for 'Lien Info Transformation'
+		Map<String, String> batchData = batchLoadTask.invokeSubmitFlow(contentId, jobDtl.getLienInfoTransformationFormula(), clientId);
+		logger.info("Lien Info Transformation Submit Flow Completed");
+		
+		//Get  Flow Status for 'Batch Load' and "Transfer Batch'
+		String flowInstanceName = batchData.get("flowInstanceName");
+		String batchName = batchData.get("batchName");
+		Map<String, String> flowStatusResponse = getFlowTaskInstanceStatusForBatches(flowInstanceName, jobDtl.getLegislativeDataGroupName(), clientId);
+		logger.info("Lien Info Transformation batch status:"+ReflectionToStringBuilder.toString(flowStatusResponse));
+		
+		
+		
+		//Repeat process for  'Lien Additional Info Transformation'
+		String batchLoadStatus = flowStatusResponse.get("batchload");
+		if(batchLoadStatus.equalsIgnoreCase("SUCCESS")) {
+			
+			//Invoke Submit Flow for Lien Additional Info Transformation
+			Map<String, String> addntlInfoBatchData = batchLoadTask.invokeSubmitFlow(contentId, jobDtl.getLienAddntlInfoTransformationFormula(), clientId);
+			logger.info("Lien Additional Info Transformation Submit Flow Response:"+ ReflectionToStringBuilder.toString(batchData));
+			
+			String addntlInfoFlowInstanceName = addntlInfoBatchData.get("flowInstanceName");
+			Map<String, String> addntlInfoFlowStatusResponse = getFlowTaskInstanceStatusForBatches(addntlInfoFlowInstanceName, jobDtl.getLegislativeDataGroupName(), clientId);
+			logger.info("Lien Additional Info Transformation batch status:"+ReflectionToStringBuilder.toString(addntlInfoFlowStatusResponse));
+			
+			batchNames.add(batchName);
+		}
+		logger.info("invokeSubmitFlowAndCheckOnStatus END. Response:"+ReflectionToStringBuilder.toString(batchNames));
+		
+		return batchNames;
+
+	}
+	
+	
+	private String getFileName(File input) {
+		return input.getName();
+	}
+	
+	private String getClientId(String fileName) {
+		return fileName.substring(0, 4).toLowerCase();
+	}
+
+	
 	/*
 	 * Cleanup files
 	 */
@@ -215,93 +238,28 @@ public class FileHandler  {
 		FileMover.removeFile(inputFile);
 	}
 
-	/*
-	 * Invoke Lien Submit File using Content ID and Flow Name.
-	 */
-	public Map<String, String> invokeSubmitFlow(String contentId, String flowName, String clientId) throws Exception {
-		Map<String, String> response = new HashMap<>();
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
-		String formattedDate = sdf.format(Calendar.getInstance().getTime());
-		
-		ClientConfiguration config = clientConfigurations.getSingleClientData(clientId);
-		NotificationJobDtl jobDtl = config.getNotificationJobDtl();
-		
-		String flowInstanceName = flowName + formattedDate;
-		String batchName = BatchLoadTaskConstants.ADP_BATCH_NAME + formattedDate;
-		response.put("batchName", batchName);
-		response.put("flowInstanceName", flowInstanceName);
-		
-		logger.info("Start:Invoking SubmitFlow. ClientId:"+ clientId+", FlowInstanceName:"+flowInstanceName+", ContentId:"+contentId+", BatchName:"+batchName);
-		batchLoadTask.invokeSubmitFlow(flowName, batchName, flowInstanceName, jobDtl.getLegislativeDataGroupName(), false,
-				contentId,  clientId,  jobDtl.getNotificationJobSubmitFlowUrl());
-		logger.info("End: SubmitFlow. ClientId:"+ clientId+", FlowInstanceName:"+flowInstanceName+", ContentId:"+contentId+", BatchName:"+batchName);
-		
-		return response;
-	}
-
 	
-	/*
-	 * Get Submit Flow Status for given 'Flow Task'
-	 */
-	private String getSubmitFlowStatus(String flowInstanceName, String legislativeDataGroupName, String flowTaskInstanceName, String clientId) throws Exception {
-		String finalResult = "FAILED";
-		int totalWaitTime = 0;
-		
-		ClientConfiguration config = clientConfigurations.getSingleClientData(clientId);
-		NotificationJobDtl jobDtl = config.getNotificationJobDtl();
-		
-		logger.info("Invoke SubmitFlowStatus for flowInstanceName [" +flowInstanceName+"] ,  flowTaskInstanceName["+ flowTaskInstanceName+"]");
-		
-		// TODO Need to handle time out scenario as well.
-		while (true) {
-			
-			String result = batchLoadTask.getInstanceTaskStatus(flowInstanceName, flowTaskInstanceName, legislativeDataGroupName, clientId,  jobDtl.getNotificationJobGetFlowStatusUrl());
-			
-			if(result.equalsIgnoreCase(BatchLoadTaskConstants.ESS_PARENT_JOB_SUB_ERROR)) {
-				break;
-			}
-
-			if (result.equalsIgnoreCase(BatchLoadTaskConstants.BATCHLOAD_ERROR_STATUS)) {
-				finalResult = result;
-				break;
-			} else if (result.equalsIgnoreCase(BatchLoadTaskConstants.BATCHLOAD_COMPLETETD_STATUS)) {
-				finalResult = result;
-				break;
-			} else {
-				logger.info("Lets retry to check status for " + flowInstanceName + "because the status received is [" +result+"]");
-				Thread.sleep(Integer.parseInt(configuration.getWaitTime()));
-				totalWaitTime = totalWaitTime + Integer.parseInt(configuration.getWaitTime());
-			}
-
-			if (totalWaitTime >= (Integer.parseInt(configuration.getMaxWaitTime()))) {
-				break;
-			}
-			
-		}
-		
-		logger.info("SubmitFlowStatus for flowInstanceName [" +flowInstanceName+"] ,  flowTaskInstanceName["+ flowTaskInstanceName+"], Response:["+finalResult+"]");
-		return finalResult;
-	}
+	
 
 	/*
-	 * Get Submit Flow Status for 'Batch Load' and 'Transfer Batch'
+	 * Get Submit Flow Status for 'Load Batch' and 'Transfer Batch' using Flow Name
 	 */
-	private Map<String, String> getSubmitFlowStatusForBatch(String flowInstanceName, String legislativeDataGroupName, String clientId) throws Exception {
+	private Map<String, String> getFlowTaskInstanceStatusForBatches(String flowInstanceName, String legislativeDataGroupName, String clientId) throws Exception {
 		Map<String, String> finaResult = new HashMap<>();
 		finaResult.put("batchload", "FAILED");
 		finaResult.put("transferbatch", "FAILED");
 		
-		// TODO Need to handle time out scenario as well.
-		String batchLoadResult = getSubmitFlowStatus(flowInstanceName, legislativeDataGroupName, BatchLoadTaskConstants.BATCHLOAD_FLOWTASKINSTANCENAME, clientId);
-		logger.info(" Result after getSubmitFlowStatus call for batchLoad task instance " + batchLoadResult);
+		//Get 'Batch Load' task status
+		String batchLoadResult = batchLoadTask.getFlowTaskInstanceStatus(flowInstanceName, legislativeDataGroupName, BatchLoadTaskConstants.BATCHLOAD_FLOWTASKINSTANCENAME, clientId);
+		logger.info("Batch Load Flow status :" + batchLoadResult);
 		
 		//Check 'Batch Load' status is completed or Not
 		if (batchLoadResult.equalsIgnoreCase(BatchLoadTaskConstants.BATCHLOAD_COMPLETETD_STATUS)) {
 			finaResult.put("batchload", "SUCCESS");
 			
 			// Lets Check for TransferBatch Status
-			String transferBatchResult = getSubmitFlowStatus(flowInstanceName, legislativeDataGroupName, BatchLoadTaskConstants.TRANSFERBATCH_FLOWTASKINSTANCENAME, clientId);
-			logger.info(" Result after getSubmitFlowStatus call for transferBatch task instance " + transferBatchResult);
+			String transferBatchResult = batchLoadTask.getFlowTaskInstanceStatus(flowInstanceName, legislativeDataGroupName, BatchLoadTaskConstants.TRANSFERBATCH_FLOWTASKINSTANCENAME, clientId);
+			logger.info("Transfer Batch Flow Status: " +transferBatchResult);
 			
 			if (transferBatchResult.equalsIgnoreCase(BatchLoadTaskConstants.BATCHLOAD_COMPLETETD_STATUS)) {
 				finaResult.put("transferbatch", "SUCCESS");
