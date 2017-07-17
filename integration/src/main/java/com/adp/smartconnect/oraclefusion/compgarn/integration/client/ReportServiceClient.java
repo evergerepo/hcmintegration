@@ -28,6 +28,10 @@ import bip_webservice.proxy.types.ParamNameValues;
 import bip_webservice.proxy.types.ReportRequest;
 import bip_webservice.proxy.types.ReportResponse;
 
+/*
+ *  ReportService methods that you can use to interact with the BI Publisher Report object.
+ *  https://docs.oracle.com/cd/E23943_01/bi.1111/e22259/reportservice.htm#BIPDV824
+ */
 public class ReportServiceClient
 {
     private String username;

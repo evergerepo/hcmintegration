@@ -26,13 +26,18 @@ import com.oracle.xmlns.apps.hcm.processflows.core.flowactionsservice.types.Subm
 import com.oracle.xmlns.apps.hcm.processflows.core.flowcontrollerservice.FlowParameterNameValues;
 import com.oracle.xmlns.apps.hcm.processflows.core.flowcontrollerservice.ObjectFactory;
 
+
+
+/*
+ * https://docs.oracle.com/cloud/farel9/globalcs_gs/OESWH/Flow_Actions_Service_FlowActionsService_svc_4.htm#oracle.apps.hcm.processFlows.core.flowActionsService.FlowActionsService_OpSect
+ * Flow Actions Service
+ */
 public class BatchLoadTask extends WebServiceGatewaySupport {
 	
 	private static final Logger log = LoggerFactory.getLogger(BatchLoadTask.class);
 
-	
-
 	/*
+	 * Submits a flow instance.
 	 * Invoke  Submit Flow using Content ID, Batch Name and Flow Name.
 	 */
 	public Map<String, String> invokeSubmitFlow(String contentId, String flowName, String clientId) throws Exception {
@@ -125,7 +130,9 @@ public class BatchLoadTask extends WebServiceGatewaySupport {
 	 
 	
 	 /*
+	  * Retrieves the flow task instance status.
 	  * Get Flow Task Instance Task using FlowTaskInstanceName
+	  * 
 	  */
 	public String  getFlowTaskInstanceStatus(String flowInstanceName, String legislativeDataGroupName, String flowTaskInstanceName, String clientId) throws Exception {
 		 

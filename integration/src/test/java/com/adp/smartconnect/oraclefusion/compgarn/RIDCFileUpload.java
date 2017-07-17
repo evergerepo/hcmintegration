@@ -1,6 +1,8 @@
 package com.adp.smartconnect.oraclefusion.compgarn;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import oracle.stellent.ridc.IdcClient;
 import oracle.stellent.ridc.IdcClientManager;
@@ -10,7 +12,7 @@ import oracle.stellent.ridc.protocol.ServiceResponse;
 
 public class RIDCFileUpload  {
 	
-	public static String FILE_NAME = "/mule/smartconnect/data/arff/compgarn/pqq/adp1.wgps.test.20170621132733.pqq";
+	public static String FILE_NAME = "/mule/smartconnect/data/arff/compgarn/lien/adp1.06062017_v1.lien.grn";
 	public static String URL = "https://ecbfdev4-test.fs.us8.oraclecloud.com/cs/idcplg";
 	
 	public static void fileUpload(String filaName, String url){
@@ -31,13 +33,18 @@ public class RIDCFileUpload  {
 			//Oracale Fusion
 			URL = "https://ecbfdev4-test.fs.us8.oraclecloud.com/cs/idcplg";
 			idcClient = m_clientManager.createClient(url);
-			 userContext = new IdcContext("###", "###"); 
+			 userContext = new IdcContext("ADP_Connect", "ah2lB}A8wj05"); 
+			 
+			 SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
+			 String formattedDate = sdf.format(Calendar.getInstance().getTime());
+			 String contentId = "UCM" + formattedDate;	
+			System.out.println("contentId==>:"+contentId);
 			
 			// create request
 			DataBinder binder = idcClient.createBinder(); 
 			binder.putLocal ("IdcService", "CHECKIN_UNIVERSAL");
 			binder.putLocal ("dDocTitle", "Test File"); 
-			binder.putLocal ("dDocName", "test-checkin-6"); 
+			binder.putLocal ("dDocName", contentId); 
 			binder.putLocal ("dDocType", "ADACCT"); 
 			binder.putLocal ("dSecurityGroup", "Public");
 			
