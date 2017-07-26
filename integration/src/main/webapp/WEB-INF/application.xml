@@ -16,7 +16,7 @@
 		http://www.springframework.org/schema/context 
         http://www.springframework.org/schema/context/spring-context.xsd">
 
-	<context:component-scan base-package="com.adp.smartconnect.oraclefusion.compgarn.controller" />
+	<context:component-scan base-package="com.adp.smartconnect.oraclefusion.compgarn" />
 	 <context:annotation-config/>
 	 
 	 
@@ -27,6 +27,7 @@
 	</beans:bean>
 	
 	<beans:bean id="config" class="com.adp.smartconnect.oraclefusion.compgarn.config.Configuration">
+	    <beans:property name="configPath" value="${configPath}" />
 		<beans:property name="notificationPath" value="${notificationPath}" />
 		<beans:property name="waitTime" value="${waitTime}" />
 		<beans:property name="maxWaitTime" value="${maxWaitTime}" />
@@ -82,7 +83,7 @@
 		<beans:property name="clientConfigurations" ref="clientConfigurations"></beans:property>
 	</beans:bean>
 	
-		<beans:bean id="clientConfigurations" class="com.adp.smartconnect.oraclefusion.compgarn.listeners.ClientConfigHolder">
+	<beans:bean id="clientConfigurations" class="com.adp.smartconnect.oraclefusion.compgarn.listeners.ClientConfigHolder">
 		<beans:property name="configuration" ref="config"></beans:property>
 	</beans:bean>
 
@@ -147,7 +148,7 @@
 
 	<file:inbound-channel-adapter id="pqqFileInbound"
 		channel="pqqInputFileChannel" 
-		filter="pqqFilter" directory="file:${fileProcessingDir}${pqqDir}${pqqInboundDir}">
+		filter="pqqFilter" directory="file:${fileProcessingDir}${pqqDir}${pqqInboundDir}" prevent-duplicates="true">
 		<int:poller fixed-rate="120000" />
 	</file:inbound-channel-adapter>
 

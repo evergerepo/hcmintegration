@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.adp.smartconnect.oraclefusion.compgarn.listeners.APPConfigHolder;
 import com.adp.smartconnect.oraclefusion.compgarn.listeners.ClientConfigHolder;
 
 @RestController
@@ -60,6 +61,24 @@ public class FileUtilController {
 		return SUCESS;
 	}
 	
+	/**
+	 * This service is used to delete file.
+	 */
+	
+	@RequestMapping(path = "/cleanDirectory", method = {RequestMethod.POST}, produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody String cleanDirectory(@RequestBody Map<String, String> files) {
+		String dirName = files.get("dirName");
+		LOGGER.info("cleanDirectory Start. File:"+dirName);
+		try{
+			FileUtils.cleanDirectory(new File(dirName));
+			LOGGER.info("cleanDirectory Complete. File:"+dirName);
+		}catch(Exception e){
+			LOGGER.info("cleanDirectory Error. Message:"+e.getMessage(), e);
+			return e.getMessage();
+		}
+		return SUCESS;
+	}
+	
 
 	/**
 	 * This service is used to re-loading client profiles
@@ -77,7 +96,24 @@ public class FileUtilController {
 		return SUCESS;
 	}
 	
+	
+	/**
+	 * This service is used to re-loading client profiles
+	 */
+	@RequestMapping(path = "/loadAppConfig", method = {RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody String loadAppConfig() {
+		try{
+			LOGGER.info("loadAppConfig Start");
+			appConfigHolder.loadAppConfig();
+			LOGGER.info("loadAppConfig Complete");
+		}catch(Exception e){
+			LOGGER.info("loadAppConfig) ERROR. Message:"+e.getMessage(), e);
+			return e.getMessage();
+		}
+		return SUCESS;
+	}
 
 	@Autowired private ClientConfigHolder clientConfigurations;
+	@Autowired private APPConfigHolder appConfigHolder;
 	
 }

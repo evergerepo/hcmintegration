@@ -11,6 +11,8 @@ import javax.xml.ws.BindingProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.adp.smartconnect.oraclefusion.compgarn.listeners.APPConfigHolder;
+
 import bip_webservice.proxy.ReportService;
 import bip_webservice.proxy.ReportService_Service;
 import bip_webservice.proxy.types.ArrayOfParamNameValue;
@@ -48,7 +50,15 @@ public class PqqLoadTask {
                 ReportService_Service reportServiceService = new ReportService_Service(new URL(url), new QName("http://xmlns.oracle.com/oxp/service/v2", "ReportService"));
                 ReportService reportService =  reportServiceService.getReportService();
                 BindingProvider bp = (BindingProvider)reportService;
-                bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, url);
+                Map<String, Object> ctx = bp.getRequestContext();
+                
+                ctx.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, url);
+                
+                if(APPConfigHolder.isProxyEnabled()){
+                	log.info("Proxy configured. :"+APPConfigHolder.getProxyHost()+","+APPConfigHolder.getProxyPort());
+                	ctx.put(BindingProvider.USERNAME_PROPERTY, APPConfigHolder.getProxyHost());
+                	ctx.put(BindingProvider.PASSWORD_PROPERTY, APPConfigHolder.getProxyPort());
+                }
                 
                 
                 ParamNameValues paramNameValues = new ParamNameValues();

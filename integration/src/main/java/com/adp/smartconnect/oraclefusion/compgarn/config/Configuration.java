@@ -2,6 +2,7 @@ package com.adp.smartconnect.oraclefusion.compgarn.config;
 
 public class Configuration {
 	
+	private String configPath;
 	private String notificationPath;
 	private String waitTime;
 	private String maxWaitTime;
@@ -20,6 +21,16 @@ public class Configuration {
 	private String lienErrorDir;
 	private String pqqDir;
 	private String lienDr;
+	
+	
+
+	public String getConfigPath() {
+		return configPath;
+	}
+
+	public void setConfigPath(String configPath) {
+		this.configPath = configPath;
+	}
 
 	public String getNotificationPath() {
 		return notificationPath;

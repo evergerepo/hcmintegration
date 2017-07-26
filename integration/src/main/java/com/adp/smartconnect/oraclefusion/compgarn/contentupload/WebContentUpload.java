@@ -8,8 +8,13 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import javax.xml.ws.BindingProvider;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.adp.smartconnect.oraclefusion.compgarn.listeners.APPConfigHolder;
 
 import oracle.stellent.ridc.IdcClient;
 import oracle.stellent.ridc.IdcClientException;
@@ -18,6 +23,7 @@ import oracle.stellent.ridc.IdcContext;
 import oracle.stellent.ridc.model.DataBinder;
 import oracle.stellent.ridc.model.TransferFile;
 import oracle.stellent.ridc.protocol.ServiceResponse;
+import oracle.stellent.ridc.protocol.http.IdcHttpClientConfig;
 
 public class WebContentUpload {
 	
@@ -102,6 +108,17 @@ public class WebContentUpload {
 			if (dDocName != null && dDocName.trim().length() > 0) {
 				request.putLocal("dDocName", dDocName);
 			} 
+			
+			
+			
+			//Check Proxy Config
+			if(APPConfigHolder.isProxyEnabled()){
+				 log.info("Proxy configured");
+				 IdcHttpClientConfig httpConfig = (IdcHttpClientConfig)idcClient.getConfig();
+				 httpConfig.setProxyHost(APPConfigHolder.getProxyHost());           
+				 httpConfig.setProxyPort(Integer.parseInt(APPConfigHolder.getProxyPort()));
+			 }
+			
 			
 			// execute the request
 			ServiceResponse response = idcClient.sendRequest(userContext, request); 

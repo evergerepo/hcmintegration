@@ -49,6 +49,11 @@ public class ClientConfigHolder {
 			JAXBContext jaxbContext = JAXBContext.newInstance(ClientConfiguration.class);
 			Unmarshaller jaxbUnMarshaller = jaxbContext.createUnmarshaller();
 			for (final File child : file.listFiles()) {
+				logger.info("Loading configuration for [" + child.getName() + "]");
+				if(child.getName().toLowerCase().endsWith(".xml")==false){
+					logger.warn("Skip Non-Xml file. File Name: [" + child.getName() + "]");
+					continue;
+				}
 				ClientConfiguration configuration = (ClientConfiguration) jaxbUnMarshaller.unmarshal(child);
 				logger.info("Loading configuration for [" + configuration.getClientId() + "]");
 				ClientConfigHolder.addClientConfiguration(configuration.getClientId(), configuration);

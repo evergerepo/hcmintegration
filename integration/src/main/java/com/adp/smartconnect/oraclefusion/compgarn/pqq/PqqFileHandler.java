@@ -51,7 +51,7 @@ public class PqqFileHandler {
 	/*
 	 * UTF-8 File generation
 	 */
-	private File getUTF8File(File input) throws IOException {
+	public File getUTF8File(File input) throws IOException {
 
 		// Change file encoding to UTF-8 if not already. We should also move the
 		// file to Temp - Start
@@ -170,7 +170,7 @@ public class PqqFileHandler {
 			writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
 			marshaller.marshal(que, writer);
 		
-			logger.info("PQQ Respons file created: File Name"+outputFile);
+			logger.info("PQQ Respons file created: File Name:"+file1.getAbsolutePath());
 		}catch(Exception e){
 			logger.error("Error while creating PQQ Respons file:"+e.getMessage(), e);
 			throw new IOException(e.getCause());
@@ -190,25 +190,15 @@ public class PqqFileHandler {
 		File doneFile = null;
 		File partFile = null;
 		File errorFile = null;
-		PqqFileDetails fileDetails = null;
-		List<String> reportResponseList = new ArrayList<String>();
+	
 		
 		try {
 			String fileName = input.getName();
 			MDC.put("transId", fileName);
 			logger.info("PQQ File processing STARTED. File Name: " + input.getAbsolutePath());
 
-			clientName = fileName.substring(0, 4).toLowerCase();
-			logger.info("The client id in Pqq is :" + clientName);
-			ClientConfiguration config = clientConfigurations.getSingleClientData(clientName);
-			if(config==null){
-				logger.error("ClientConfiguration set-up is missing. Client Id:"+clientName);
-				return null;
-			}
-
 			// Check if the file is getting processed
 			String inboundFileBaseName = FilenameUtils.getBaseName(fileName);
-			fileDetails = config.getPqqFileDetails();
 			String processingDir = configuration.getFileProcessingDir() + configuration.getPqqDir()+ configuration.getPqqProcessedDir();
 
 			inProcessingFile = new File(processingDir + inboundFileBaseName + ".processing");
@@ -216,7 +206,6 @@ public class PqqFileHandler {
 			partFile = new File(processingDir + inboundFileBaseName + ".part.done");
 			errorFile = new File(processingDir + inboundFileBaseName + ".error");
 
-			
 			if (inProcessingFile.exists() || doneFile.exists()) {
 				logger.warn("Processing/Done file found, stop processing file.");
 				return null;
@@ -226,53 +215,7 @@ public class PqqFileHandler {
 			logger.info("Create Processing File: File Name:" + inProcessingFile.getAbsolutePath());
 			inProcessingFile.createNewFile();
 
-			// Get the UTF 8 File
-			File utf8File = getUTF8File(input);
-			PQFile file = convertFileToObject(utf8File);
-			
-			List<PreQualRecord> qualRecords = file.getPreQualRecordList().getQualRecords();
-			String transID = file.getTransmissionID();
-			logger.info("No of PQQ records in file:"+file.getPreQualRecordList().getQualRecords().size());
-			
-
-			int i = 1;
-			Map<String, Boolean> successRecs = new HashMap<>();
-			Map<String, Boolean> failureRecs = new HashMap<>();
-
-			//Process each PQQ Record
-			for (PreQualRecord rec : qualRecords) {
-				String key = null;
-				try {
-					key = rec.getSSN() + " " + rec.getEEFirstName();
-					String reportResponse = callRunReport(rec, fileDetails, transID);
-					reportResponseList.add(reportResponse);
-					successRecs.put(key, true);
-				} catch (Exception exc) {
-					failureRecs.put(key, false);
-					logger.error("Error processing PQQ Record. Record Key:"+key, exc);
-				}
-
-				i = i + 1;
-			}
-			
-
-			//Check for any Exceptions
-			isPartDone = (failureRecs.size() != 0);
-			if(isPartDone) {
-				logger.error("No of Failed Records:"+failureRecs.size()+",  Sucessful records:"+successRecs.size());
-				Iterator<String> failRecsItr = failureRecs.keySet().iterator();
-				while(failRecsItr.hasNext()) {
-					String key = (String)failRecsItr.next();
-					logger.error("Error Record Key:"+key);
-				}
-			}
-			
-
-			// Merge PQFile objects
-			PQFile pqFile = mergePQQReportResponse(reportResponseList);
-
-			// Create the response file
-			createPQQResponseFile(config, pqFile);
+			processFile(input) ;
 
 		} catch (Exception exc) {
 			logger.error("handleFile() Exception in PqqFileHandler. Message: "+exc.getMessage(), exc);
@@ -295,12 +238,79 @@ public class PqqFileHandler {
 	
 	
 	/*
+	 * Process PQQ Input File
+	 */
+	public boolean processFile(File input) throws Exception{
+		List<String> reportResponseList = new ArrayList<String>();
+		boolean isPartDone = false;
+		
+		try{
+			String fileName = input.getName();
+			clientName = fileName.substring(0, 4).toLowerCase();
+			logger.info("The client id in Pqq is :" + clientName);
+			ClientConfiguration config = clientConfigurations.getSingleClientData(clientName);
+			if(config==null){
+				new Exception("ClientConfiguration set-up is missing. Client Id:"+clientName);
+			}
+			
+			// Get the UTF 8 File
+			File utf8File = getUTF8File(input);
+			PQFile file = convertFileToObject(utf8File);
+			
+			List<PreQualRecord> qualRecords = file.getPreQualRecordList().getQualRecords();
+			String transID = file.getTransmissionID();
+			logger.info("No of PQQ records in file:"+file.getPreQualRecordList().getQualRecords().size());
+			
+			int i = 1;
+			Map<String, Boolean> successRecs = new HashMap<>();
+			Map<String, Boolean> failureRecs = new HashMap<>();
+	
+			//Process each PQQ Record
+			for (PreQualRecord rec : qualRecords) {
+				String key = null;
+				try {
+					key = rec.getSSN() + " " + rec.getEEFirstName();
+					String reportResponse = callRunReport(rec, config.getPqqFileDetails(), transID);
+					reportResponseList.add(reportResponse);
+					successRecs.put(key, true);
+				} catch (Exception exc) {
+					failureRecs.put(key, false);
+					logger.error("Error processing PQQ Record. Record Key:"+key, exc);
+				}
+	
+				i = i + 1;
+			}
+			
+			//Check for any Exceptions
+			isPartDone = (failureRecs.size() != 0);
+			if(isPartDone) {
+				logger.error("No of Failed Records:"+failureRecs.size()+",  Sucessful records:"+successRecs.size());
+				Iterator<String> failRecsItr = failureRecs.keySet().iterator();
+				while(failRecsItr.hasNext()) {
+					String key = (String)failRecsItr.next();
+					logger.error("Error Record Key:"+key);
+				}
+			}
+			
+			// Merge PQFile objects
+			PQFile pqFile = mergePQQReportResponse(reportResponseList);
+	
+			// Create the response file
+			createPQQResponseFile(config, pqFile);
+		
+		}catch(Exception exc){
+			logger.error("handleFile() Exception in PqqFileHandler. Message: "+exc.getMessage(), exc);
+			throw exc;
+		}
+		return isPartDone;
+	}
+	
+	/*
 	 * Post process after completing the process
 	 */
 	private void postProcess(File input, File inProcessingFile){
 		
 		try{
-			
 			//1. Copy Input file to Archive Folder
 			FileMover.handleFile(input, configuration.getFileProcessingDir()+configuration.getPqqDir()+configuration.getPqqArchiveDir());
 			
