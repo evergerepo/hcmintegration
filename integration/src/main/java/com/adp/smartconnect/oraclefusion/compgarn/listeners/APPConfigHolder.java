@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import com.adp.smartconnect.oraclefusion.compgarn.config.Configuration;
 
+import oracle.stellent.ridc.protocol.http.IdcHttpClientConfig;
+
 @Service("appConfigHolder")
 public class APPConfigHolder {
 	
@@ -70,7 +72,7 @@ public class APPConfigHolder {
 				appConfig.put(key, properties.getProperty(key));
 			}
 
-			
+			setupSystemProxy();
 		} catch (Exception exc) {
 			logger.error("Error loading app config file loadAppConfig() ", exc);
 		}finally{
@@ -82,6 +84,17 @@ public class APPConfigHolder {
 		}
 	}
 
+	//Set-up Proxy Congig
+	public void setupSystemProxy(){
+		if(APPConfigHolder.isProxyEnabled()){
+			logger.info("Proxy configured. Setting System Param for Proxy."+
+							APPConfigHolder.getProxyHost()+","+APPConfigHolder.getProxyPort());
+			 System.setProperty("http.proxyHost", APPConfigHolder.getProxyHost());
+			 System.setProperty("https.proxyHost", APPConfigHolder.getProxyHost());
+			 System.setProperty("http.proxyPort", APPConfigHolder.getProxyPort());
+			 System.setProperty("https.proxyPort", APPConfigHolder.getProxyPort());
+		 }
+	}
 	
 	@Autowired private Configuration configuration;
 }

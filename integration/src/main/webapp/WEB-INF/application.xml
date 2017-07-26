@@ -108,7 +108,7 @@
 	
 	
 	<!--  Spring Integration File Inbound/Outbound Channesl -->
-	
+
 	<int:poller id="poller" default="true" fixed-delay="120000" />
 		
 	<int:service-activator id="notifFileServiceActivator" input-channel="lienFileChannel" ref="handler" method="handleFile"></int:service-activator>
@@ -117,6 +117,7 @@
 		<int:queue />
 	</int:channel>
 
+ 
 	<file:inbound-channel-adapter id="fileInbound" channel="lienFileChannel" auto-create-directory="true" 
 		directory="file:${fileProcessingDir}${lienDr}${lienInboundDir}" filter="lienFileFilter">
 		<int:poller fixed-rate="120000" />
@@ -145,6 +146,7 @@
 	<int:channel id="pqqInputFileChannel">
 		<int:queue />
 	</int:channel>
+
 
 	<file:inbound-channel-adapter id="pqqFileInbound"
 		channel="pqqInputFileChannel" 

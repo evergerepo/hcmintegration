@@ -109,14 +109,12 @@ public class WebContentUpload {
 				request.putLocal("dDocName", dDocName);
 			} 
 			
-			
-			
+
 			//Check Proxy Config
 			if(APPConfigHolder.isProxyEnabled()){
-				 log.info("Proxy configured");
+				log.info("Proxy configured. :"+APPConfigHolder.getProxyHost()+","+APPConfigHolder.getProxyPort());
 				 IdcHttpClientConfig httpConfig = (IdcHttpClientConfig)idcClient.getConfig();
-				 httpConfig.setProxyHost(APPConfigHolder.getProxyHost());           
-				 httpConfig.setProxyPort(Integer.parseInt(APPConfigHolder.getProxyPort()));
+				 httpConfig.setUseSystemProxy(true);
 			 }
 			
 			

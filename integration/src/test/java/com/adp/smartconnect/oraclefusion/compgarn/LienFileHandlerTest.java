@@ -28,7 +28,7 @@ public class LienFileHandlerTest {
 	}
 
 	
-	@Test
+	//@Test
 	public void createStrippedFile() throws Exception{
 		FileHandler fileHandler = new FileHandler();
 		File inputFile = new File("/mule/smartconnect/data/arff/compgarn/lien/adp1.06062017_v1.lien.grn");

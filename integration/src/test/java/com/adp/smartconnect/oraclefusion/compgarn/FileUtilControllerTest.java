@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.BeforeClass;
-import org.junit.Test;
 
 import com.adp.smartconnect.oraclefusion.compgarn.controller.FileUtilController;
 
@@ -19,7 +18,7 @@ public class FileUtilControllerTest {
 	}
 	
 	
-	@Test
+	//@Test
 	public void copyFile() {
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("srcFile", "/mule/smartconnect/data/arff/compgarn/pqq/adp1.wgps.test.20170621132733.pqq");
@@ -27,14 +26,14 @@ public class FileUtilControllerTest {
 		fileUtilController.copyFile(map);
 	}
 	
-	@Test
+	//@Test
 	public void deleteFile() {
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("fileName", "/mule/smartconnect/data/arff/compgarn/pqq/adp1.wgps.test.20170621132733.pqq");
 		fileUtilController.deleteFile(map);
 	}
 	
-	@Test
+	//@Test
 	public void cleanDirectory() {
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("dirName", "/mule/smartconnect/data/arff/compgarn/pqq/archive");

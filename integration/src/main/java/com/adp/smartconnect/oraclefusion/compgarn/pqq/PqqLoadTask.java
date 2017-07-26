@@ -48,19 +48,12 @@ public class PqqLoadTask {
         		log.debug("callRunReport() :"+reportPath+","+data+","+username+","+password+", URL:"+url); 
                
                 ReportService_Service reportServiceService = new ReportService_Service(new URL(url), new QName("http://xmlns.oracle.com/oxp/service/v2", "ReportService"));
-                ReportService reportService =  reportServiceService.getReportService();
+        		ReportService reportService =  reportServiceService.getReportService();
                 BindingProvider bp = (BindingProvider)reportService;
+                
                 Map<String, Object> ctx = bp.getRequestContext();
-                
                 ctx.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, url);
-                
-                if(APPConfigHolder.isProxyEnabled()){
-                	log.info("Proxy configured. :"+APPConfigHolder.getProxyHost()+","+APPConfigHolder.getProxyPort());
-                	ctx.put(BindingProvider.USERNAME_PROPERTY, APPConfigHolder.getProxyHost());
-                	ctx.put(BindingProvider.PASSWORD_PROPERTY, APPConfigHolder.getProxyPort());
-                }
-                
-                
+               
                 ParamNameValues paramNameValues = new ParamNameValues();
                 // Calling runReport
                 ReportRequest reportRequest = new ReportRequest();
