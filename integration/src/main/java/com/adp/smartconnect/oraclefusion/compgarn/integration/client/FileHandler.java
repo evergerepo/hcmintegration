@@ -100,8 +100,10 @@ public class FileHandler  {
 					uploadDtl.getWebContentPwd(), strippedWorkFile.getAbsolutePath());
 			logger.info("STEP2: Upload Lien file to Content Server completd. ContentId: "+contentId);
 			
-			
-			//Step 3,4,5:Trigger Run flow and Check status for 'Load Batch' and 'Transfer Batch'
+			createThirdParty(contentId, config, strippedWorkFile, clientId);
+			logger.info("STEP3: Trigger Third Party Creation Flow Completed");
+
+			//Step 4,5,6:Trigger Run flow and Check status for 'Load Batch' and 'Transfer Batch'
 			List<String> batchNames = processSubmitFlowAndCheckOnStatus(contentId, config, clientId);
 			
 			
@@ -269,7 +271,30 @@ public class FileHandler  {
 		return finaResult;
 	}
 
-	
+	private List<String> createThirdParty(String contentId, ClientConfiguration config, File child, String clientId) throws Exception {
+		
+		try{
+			
+			Map<String, String> flowStatusResponse = null;
+			NotificationJobDtl jobDtl = config.getNotificationJobDtl();
+			
+			// Get the BatchLoad Task
+			Map<String, String> batchData = batchLoadTask.invokeSubmitFlow(contentId, "ADP Third Party Inbound", clientId);
+			
+			String flowInstanceName = batchData.get("flowInstanceName");
+			String batchName = batchData.get("batchName");
+			
+			flowStatusResponse = getFlowTaskInstanceStatusForBatches(flowInstanceName, jobDtl.getLegislativeDataGroupName(), clientId);
+
+			logger.info("The flow status response for file " + child.getName() + " and the batch name "+ batchName +" is " 
+			+ flowStatusResponse);
+			
+		}catch(Exception exc) {
+			exc.printStackTrace();
+		}
+
+		return null;
+	}	
 	
 	public Configuration getConfiguration() {
 		return configuration;
