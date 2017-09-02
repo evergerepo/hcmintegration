@@ -45,6 +45,9 @@ public class NotificationJobDtl {
 	@XmlElement(name="LienEndDtTransformationFormula")
 	private String LienEndDtTransformationFormula;
 	
+	@XmlElement(name="ThirdPartyTransformationFormula")
+	private String thirdPartyTransformationFormula;
+	
 	@XmlElement(name="NotificationOutputFormat")
 	private String NotificationOutputFormat;
 
@@ -150,6 +153,14 @@ public class NotificationJobDtl {
 
 	public void setReportServiceUrl(String reportServiceUrl) {
 		ReportServiceUrl = reportServiceUrl;
+	}
+
+	public String getThirdPartyTransformationFormula() {
+		return thirdPartyTransformationFormula;
+	}
+
+	public void setThirdPartyTransformationFormula(String thirdPartyTransformationFormula) {
+		this.thirdPartyTransformationFormula = thirdPartyTransformationFormula;
 	}
 
 }
