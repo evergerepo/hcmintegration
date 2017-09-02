@@ -279,7 +279,7 @@ public class FileHandler  {
 			NotificationJobDtl jobDtl = config.getNotificationJobDtl();
 			
 			// Get the BatchLoad Task
-			Map<String, String> batchData = batchLoadTask.invokeSubmitFlow(contentId, "ADP Third Party Inbound", clientId);
+			Map<String, String> batchData = batchLoadTask.invokeSubmitFlow(contentId, jobDtl.getThirdPartyTransformationFormula(), clientId);
 			
 			String flowInstanceName = batchData.get("flowInstanceName");
 			String batchName = batchData.get("batchName");
