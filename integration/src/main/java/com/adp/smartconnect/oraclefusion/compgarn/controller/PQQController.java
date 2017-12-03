@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.adp.smartconnect.oraclefusion.compgarn.listeners.ClientConfigHolder;
 import com.adp.smartconnect.oraclefusion.compgarn.pqq.PqqFileHandler;
+import com.adp.smartconnect.oraclefusion.compgarn.util.CommonUtil;
 
 @RestController
 @RequestMapping("/pqq")
@@ -27,22 +28,27 @@ public class PQQController {
 	 * This service is used to re-loading client profiles
 	 */
 	@RequestMapping(path = "/pqqProcess", method = {RequestMethod.POST}, produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody Boolean pqqProcess(@RequestBody Map<String, String> files) {
+	public @ResponseBody String pqqProcess(@RequestBody Map<String, String> files) {
 		String fileName = files.get("fileName");
 		Boolean processed = false;
+		String transId = null;
 		try{
-			LOGGER.info("pqqProcess Start. File Name:"+fileName);
-			File file = new File(fileName);
-			MDC.put("transId", file.getName());
+			LOGGER.info("pqqProcess Start. File Name:{}", fileName);
+			transId = CommonUtil.generateId();
+			String jobStepId = CommonUtil.generateId(transId);
 			
-			processed= pqqFileHandler.processFile(file);
+			File file = new File(fileName);
+			MDC.put("transId", transId);
+			MDC.put("fileName", file.getName());
+			
+			processed= pqqFileHandler.processFile(file, transId,jobStepId );
 					
-			LOGGER.info("pqqProcess Complete. Processed:"+processed);
+			LOGGER.info("pqqProcess Complete. Processed:{}", processed);
 		}catch(Exception e){
 			LOGGER.info("pqqProcess ERROR. Message:"+e.getMessage(), e);
 		}
 		MDC.clear();
-		return processed;
+		return transId;
 	}
 	
 	

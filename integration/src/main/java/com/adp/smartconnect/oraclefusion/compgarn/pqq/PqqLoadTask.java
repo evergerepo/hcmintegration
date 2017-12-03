@@ -11,8 +11,6 @@ import javax.xml.ws.BindingProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adp.smartconnect.oraclefusion.compgarn.listeners.APPConfigHolder;
-
 import bip_webservice.proxy.ReportService;
 import bip_webservice.proxy.ReportService_Service;
 import bip_webservice.proxy.types.ArrayOfParamNameValue;

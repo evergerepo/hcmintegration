@@ -3,24 +3,18 @@
 
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<layout class="ch.qos.logback.classic.PatternLayout">
-
 			<Pattern>
-				 %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{0} [%X{transId}] - %msg%n
+				 %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{0} [%X{transId}:%X{fileName}] - %msg%n
 			</Pattern>
-
 		</layout>
 	</appender>
 
 	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<!-- <file>C:/logs/everge.log</file> -->
 		<file>${catalina.base}/logs/sc-oraclefusion-compgarn.log</file>
 		<append>false</append>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<!-- daily rollover -->
-			<!-- <fileNamePattern>C:/logs/everge.%d{yyyy-MM-dd}.%i.log</fileNamePattern>  -->
 			<fileNamePattern>${catalina.base}/logs/sc-oraclefusion-compgarn.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
 			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-				<!-- or whenever the file size reaches 50MB -->
 				<maxFileSize>50MB</maxFileSize>
 			</timeBasedFileNamingAndTriggeringPolicy>
 			<!-- keep 30 days' worth of history -->
@@ -30,6 +24,12 @@
 			<pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{0} [%X{transId}] - %msg%n</pattern>
 		</encoder>
 	</appender>
+	
+
+    <logger name="org.apache.commons" level="ERROR"/>
+    <logger name="org.springframework" level="ERROR"/>
+     <logger name="org" level="ERROR"/>
+    
 
 	<root level="INFO">
 		<appender-ref ref="FILE" />

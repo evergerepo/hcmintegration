@@ -27,12 +27,16 @@ import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.adp.smartconnect.oraclefusion.compgarn.clientConfiguration.ClientConfiguration;
 import com.adp.smartconnect.oraclefusion.compgarn.clientConfiguration.PqqFileDetails;
 import com.adp.smartconnect.oraclefusion.compgarn.config.Configuration;
 import com.adp.smartconnect.oraclefusion.compgarn.integration.client.FileMover;
 import com.adp.smartconnect.oraclefusion.compgarn.listeners.ClientConfigHolder;
+import com.adp.smartconnect.oraclefusion.compgarn.service.JobTrackingService;
+import com.adp.smartconnect.oraclefusion.compgarn.util.CGConstants;
+import com.adp.smartconnect.oraclefusion.compgarn.util.CommonUtil;
 import com.adp.smartconnect.oraclefusion.compgarn.xmltypes.PQFile;
 import com.adp.smartconnect.oraclefusion.compgarn.xmltypes.PreQualRecord;
 
@@ -47,6 +51,8 @@ public class PqqFileHandler {
 	private ClientConfigHolder clientConfigurations;
 
 	private PqqLoadTask pqqLoadTask = new PqqLoadTask();
+	
+	@Autowired  JobTrackingService jobTrackingService;
 	
 	/*
 	 * UTF-8 File generation
@@ -112,8 +118,10 @@ public class PqqFileHandler {
 		pqqLoadTask.setLocale(fileDetails.getPqqLocale());
 		pqqLoadTask.setChunkSizeDownload(-1);
 
-		return pqqLoadTask.callRunReport(fileDetails.getPqqReportPath(), data, fileDetails.getPqqUsername(),
+		String response =  pqqLoadTask.callRunReport(fileDetails.getPqqReportPath(), data, fileDetails.getPqqUsername(),
 				fileDetails.getPqqPassword(), fileDetails.getPqqFormat(), null);
+		
+		return response;
 	}
 	
 	
@@ -147,12 +155,13 @@ public class PqqFileHandler {
 	/*
 	 * Create PQQ Response file
 	 */
-	private void createPQQResponseFile(ClientConfiguration config, PQFile que) throws JAXBException, IOException {
+	private String createPQQResponseFile(ClientConfiguration config, PQFile que) throws JAXBException, IOException {
 
+		String outputFile = null;
 		try{
 			// Create directory
 			String pqqRespDir = configuration.getFileProcessingDir() + configuration.getPqqDir()+configuration.getPqqOutboundDir();
-			String outputFile = getPQResponseFileName(config);
+			 outputFile = getPQResponseFileName(config);
 			logger.info("Pqq response File: " + outputFile);
 	
 			File file1 = new File(pqqRespDir + "/" + outputFile);
@@ -175,6 +184,7 @@ public class PqqFileHandler {
 			logger.error("Error while creating PQQ Respons file:"+e.getMessage(), e);
 			throw new IOException(e.getCause());
 		}
+		return outputFile;
 	}
 
 	
@@ -190,11 +200,13 @@ public class PqqFileHandler {
 		File doneFile = null;
 		File partFile = null;
 		File errorFile = null;
+		String transId = CommonUtil.generateId();
+		String jobStepId = CommonUtil.generateId(transId);
 	
-		
 		try {
 			String fileName = input.getName();
-			MDC.put("transId", fileName);
+			MDC.put("transId", transId);
+			MDC.put("fileName", fileName);
 			logger.info("PQQ File processing STARTED. File Name: " + input.getAbsolutePath());
 
 			// Check if the file is getting processed
@@ -207,15 +219,18 @@ public class PqqFileHandler {
 			errorFile = new File(processingDir + inboundFileBaseName + ".error");
 
 			if (inProcessingFile.exists() || doneFile.exists()) {
-				logger.warn("Processing/Done file found, stop processing file.");
+				logger.warn(">>>>>>>>>>>>>>>>>>>>>>PROCESSING/DONE file found, stop processing file.");
 				return null;
 			}
+			
+			
+			logger.info(">>>>>>>>>>>> Started Processing File.{}, TransId:{}", fileName, transId);
 			
 			// Create in processing file
 			logger.info("Create Processing File: File Name:" + inProcessingFile.getAbsolutePath());
 			inProcessingFile.createNewFile();
 
-			processFile(input) ;
+			processFile(input, transId, jobStepId) ;
 
 		} catch (Exception exc) {
 			logger.error("handleFile() Exception in PqqFileHandler. Message: "+exc.getMessage(), exc);
@@ -240,26 +255,32 @@ public class PqqFileHandler {
 	/*
 	 * Process PQQ Input File
 	 */
-	public boolean processFile(File input) throws Exception{
+	public boolean processFile(File input, String transId, String jobStepId) throws Exception{
 		List<String> reportResponseList = new ArrayList<String>();
 		boolean isPartDone = false;
 		
 		try{
 			String fileName = input.getName();
 			clientName = fileName.substring(0, 4).toLowerCase();
-			logger.info("The client id in Pqq is :" + clientName);
+			logger.info("The client id in Pqq is :{}" , clientName);
+			
+			//Create Job Event/Steps
+			jobTrackingService.trackStartJob(CGConstants.JOB_PQQ_NAME, clientName, fileName, transId, jobStepId, CGConstants.JOB_STEP_PQQ_NAME);
+
 			ClientConfiguration config = clientConfigurations.getSingleClientData(clientName);
 			if(config==null){
+				jobTrackingService.trackException(transId, jobStepId,  "ClientConfiguration", "ClientConfiguration set-up is missing. Client Id:"+clientName);
 				new Exception("ClientConfiguration set-up is missing. Client Id:"+clientName);
 			}
 			
 			// Get the UTF 8 File
-			File utf8File = getUTF8File(input);
+			File utf8File = getUTF8File(input);//Check this is required TODO
 			PQFile file = convertFileToObject(utf8File);
 			
 			List<PreQualRecord> qualRecords = file.getPreQualRecordList().getQualRecords();
 			String transID = file.getTransmissionID();
 			logger.info("No of PQQ records in file:"+file.getPreQualRecordList().getQualRecords().size());
+			jobTrackingService.trackActivity(transId, jobStepId, "Records Count", "No of Records:"+qualRecords.size());
 			
 			int i = 1;
 			Map<String, Boolean> successRecs = new HashMap<>();
@@ -270,12 +291,15 @@ public class PqqFileHandler {
 				String key = null;
 				try {
 					key = rec.getSSN() + " " + rec.getEEFirstName();
+					jobTrackingService.trackActivity(transId, jobStepId, "Processing Record Number ["+i+"]", "Employee Name:"+rec.getEEFirstName()+" "+rec.getEELastName());
 					String reportResponse = callRunReport(rec, config.getPqqFileDetails(), transID);
 					reportResponseList.add(reportResponse);
 					successRecs.put(key, true);
 				} catch (Exception exc) {
 					failureRecs.put(key, false);
 					logger.error("Error processing PQQ Record. Record Key:"+key, exc);
+					jobTrackingService.trackActivity(transId, jobStepId, "ERROR Processing PQQ Record", 
+							"Employee Name:"+rec.getEEFirstName()+" "+rec.getEELastName()+", Message:"+exc.getMessage());
 				}
 	
 				i = i + 1;
@@ -285,6 +309,9 @@ public class PqqFileHandler {
 			isPartDone = (failureRecs.size() != 0);
 			if(isPartDone) {
 				logger.error("No of Failed Records:"+failureRecs.size()+",  Sucessful records:"+successRecs.size());
+				jobTrackingService.trackActivity(transId, jobStepId, "Processed Record Count", 
+						"No of Failed Records:"+failureRecs.size()+",  Sucessful records:"+successRecs.size());
+				
 				Iterator<String> failRecsItr = failureRecs.keySet().iterator();
 				while(failRecsItr.hasNext()) {
 					String key = (String)failRecsItr.next();
@@ -296,10 +323,13 @@ public class PqqFileHandler {
 			PQFile pqFile = mergePQQReportResponse(reportResponseList);
 	
 			// Create the response file
-			createPQQResponseFile(config, pqFile);
+			String responseFile = createPQQResponseFile(config, pqFile);
+			jobTrackingService.trackActivity(transId, jobStepId, "PQQ Response", 
+					"PQQ Response File Generated. File Name:["+responseFile+"]");
 		
 		}catch(Exception exc){
 			logger.error("handleFile() Exception in PqqFileHandler. Message: "+exc.getMessage(), exc);
+			jobTrackingService.trackException(transId,  jobStepId, "PQQ Processing Error", exc.getMessage());
 			throw exc;
 		}
 		return isPartDone;
@@ -330,7 +360,9 @@ public class PqqFileHandler {
 	
 	
 	
-
+	/*
+	 * Generate PQQ Response File
+	 */
 	private String getPQResponseFileName(ClientConfiguration config) {
 		// Create Pqq Format
 		String outputFormat = config.getPqqFileDetails().getPqqOutputFormat();

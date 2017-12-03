@@ -19,7 +19,6 @@
 	<context:component-scan base-package="com.adp.smartconnect.oraclefusion.compgarn" />
 	 <context:annotation-config/>
 	 
-	 
 	<beans:bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<beans:property name="location">
 			<beans:value>classpath:config.properties</beans:value>
