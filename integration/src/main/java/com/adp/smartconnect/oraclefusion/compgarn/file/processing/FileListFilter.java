@@ -28,6 +28,10 @@ public class FileListFilter<F> extends AbstractFileListFilter<F> {
 		MDC.put("transId", f.getName()+":"+RandomStringUtils.randomNumeric(10));
 		log.info("Input File : ["+f.getAbsolutePath()+"]");
 		
+		if(f.getName().startsWith(".")) {
+			log.debug("File is hidden file.... Ignore File");
+			return false;
+		}
 		
 		if(f.getAbsolutePath().contains(".working") || f.getAbsolutePath().contains(".writing")) {
 			log.warn("File is Working file. Wait for some time to complete process......");

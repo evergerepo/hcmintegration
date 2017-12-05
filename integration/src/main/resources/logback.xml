@@ -21,7 +21,7 @@
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
 		<encoder>
-			<pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{0} [%X{transId}] - %msg%n</pattern>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{0} [%X{transId}:%X{fileName}] - %msg%n</pattern>
 		</encoder>
 	</appender>
 	

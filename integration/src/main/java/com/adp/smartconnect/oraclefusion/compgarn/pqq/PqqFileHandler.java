@@ -54,6 +54,76 @@ public class PqqFileHandler {
 	
 	@Autowired  JobTrackingService jobTrackingService;
 	
+	
+
+	/*
+	 * Handle Input PQQ File
+	 * 1. Create encoded UTF-8 file from source
+	 * 2. Convert XML date to POJO
+	 * 3. Reach each EMployee and Invoke Web Service
+	 * 4. Get each Employee response and create response file
+	 * 
+	 */
+	public File handleFile(File input) throws IOException {
+
+		boolean isPartDone = false;
+		boolean isError = false;
+		File inProcessingFile = null;
+		File doneFile = null;
+		File partFile = null;
+		File errorFile = null;
+		String transId = CommonUtil.generateId();
+		String jobStepId = CommonUtil.generateId(transId);
+	
+		try {
+			String fileName = input.getName();
+			MDC.put("transId", transId);
+			MDC.put("fileName", fileName);
+			logger.info("PQQ File processing STARTED. File Name: " + input.getAbsolutePath());
+
+			// Check if the file is getting processed
+			String inboundFileBaseName = FilenameUtils.getBaseName(fileName);
+			String processingDir = configuration.getFileProcessingDir() + configuration.getPqqDir()+ configuration.getPqqProcessedDir();
+
+			inProcessingFile = new File(processingDir + inboundFileBaseName + ".processing");
+			doneFile = new File(processingDir + inboundFileBaseName + ".done");
+			partFile = new File(processingDir + inboundFileBaseName + ".part.done");
+			errorFile = new File(processingDir + inboundFileBaseName + ".error");
+
+			if (inProcessingFile.exists() || doneFile.exists()) {
+				logger.warn(">>>>>>>>>>>>>>>>>>>>>>PROCESSING/DONE file found, stop processing file.");
+				return null;
+			}
+			
+			
+			logger.info(">>>>>>>>>>>> Started Processing File.{}, TransId:{}", fileName, transId);
+			
+			// Create in processing file
+			logger.info("Create Processing File: File Name:" + inProcessingFile.getAbsolutePath());
+			inProcessingFile.createNewFile();
+
+			processFile(input, transId, jobStepId) ;
+
+		} catch (Exception exc) {
+			logger.error("handleFile() Exception in PqqFileHandler. Message: "+exc.getMessage(), exc);
+			errorFile.createNewFile();
+			isError = true;
+		} finally {
+			if (!isError && isPartDone) {
+				partFile.createNewFile();
+			} else if(!isError) {
+				doneFile.createNewFile();
+			}
+			postProcess( input,  inProcessingFile);
+		}
+		
+		
+		MDC.clear();
+		logger.info("PQQ File processing COMPLETED. File Name: " + input.getAbsolutePath());
+		return null;
+	}
+	
+	
 	/*
 	 * UTF-8 File generation
 	 */
@@ -188,68 +258,6 @@ public class PqqFileHandler {
 	}
 
 	
-	
-	/*
-	 * Handle Input PQQ File
-	 */
-	public File handleFile(File input) throws IOException {
-
-		boolean isPartDone = false;
-		boolean isError = false;
-		File inProcessingFile = null;
-		File doneFile = null;
-		File partFile = null;
-		File errorFile = null;
-		String transId = CommonUtil.generateId();
-		String jobStepId = CommonUtil.generateId(transId);
-	
-		try {
-			String fileName = input.getName();
-			MDC.put("transId", transId);
-			MDC.put("fileName", fileName);
-			logger.info("PQQ File processing STARTED. File Name: " + input.getAbsolutePath());
-
-			// Check if the file is getting processed
-			String inboundFileBaseName = FilenameUtils.getBaseName(fileName);
-			String processingDir = configuration.getFileProcessingDir() + configuration.getPqqDir()+ configuration.getPqqProcessedDir();
-
-			inProcessingFile = new File(processingDir + inboundFileBaseName + ".processing");
-			doneFile = new File(processingDir + inboundFileBaseName + ".done");
-			partFile = new File(processingDir + inboundFileBaseName + ".part.done");
-			errorFile = new File(processingDir + inboundFileBaseName + ".error");
-
-			if (inProcessingFile.exists() || doneFile.exists()) {
-				logger.warn(">>>>>>>>>>>>>>>>>>>>>>PROCESSING/DONE file found, stop processing file.");
-				return null;
-			}
-			
-			
-			logger.info(">>>>>>>>>>>> Started Processing File.{}, TransId:{}", fileName, transId);
-			
-			// Create in processing file
-			logger.info("Create Processing File: File Name:" + inProcessingFile.getAbsolutePath());
-			inProcessingFile.createNewFile();
-
-			processFile(input, transId, jobStepId) ;
-
-		} catch (Exception exc) {
-			logger.error("handleFile() Exception in PqqFileHandler. Message: "+exc.getMessage(), exc);
-			errorFile.createNewFile();
-			isError = true;
-		} finally {
-			if (!isError && isPartDone) {
-				partFile.createNewFile();
-			} else if(!isError) {
-				doneFile.createNewFile();
-			}
-			postProcess( input,  inProcessingFile);
-		}
-		
-		
-		MDC.clear();
-		logger.info("PQQ File processing COMPLETED. File Name: " + input.getAbsolutePath());
-		return null;
-	}
 	
 	
 	/*
