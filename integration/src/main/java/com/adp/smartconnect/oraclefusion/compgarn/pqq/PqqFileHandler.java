@@ -313,7 +313,10 @@ public class PqqFileHandler {
 					String reportResponse = callRunReport(rec, config.getPqqFileDetails(), transID);
 					reportResponseList.add(reportResponse);
 					successRecs.put(key, true);
-				} catch (Exception exc) {
+				}catch (Exception exc) {
+					if(exc instanceof javax.xml.ws.WebServiceException || exc instanceof java.net.ConnectException){
+						throw exc;
+					}
 					failureRecs.put(key, false);
 					logger.error("Error processing PQQ Record. Record Key:"+key, exc);
 					jobTrackingService.trackActivity(transId, jobStepId, "ERROR Processing PQQ Record", 

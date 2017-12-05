@@ -86,11 +86,12 @@ public class JobTrackingGateway {
      * @param jobStep
      */
     public void processJobStep(JobStepDTO jobStep){
-        createJobSteps(jobStep.getJobName(), jobStep.getSourceData(), jobStep.getErrors(), null,
-                jobStep.getJobStepId(), jobStep.getStatus(), jobStep.getJobId(), jobStep.getWarnings());
-
         if (jobStep.isUpdate()) {
             updateJobStatus(jobStep.getJobId(), jobStep.getJobStepId(), jobStep.getJobName(), jobStep.getErrors(), jobStep.getWarnings());
+        }else{
+        	createJobSteps(jobStep.getJobName(), jobStep.getSourceData(), jobStep.getErrors(), null,
+                    jobStep.getJobStepId(), jobStep.getStatus(), jobStep.getJobId(), jobStep.getWarnings());
+
         }
     }
 
