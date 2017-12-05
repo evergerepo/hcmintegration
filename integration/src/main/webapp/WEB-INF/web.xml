@@ -4,11 +4,11 @@
 	      http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	version="2.5">
 
-  <display-name>Everge Web Application For the Client ADP</display-name>
+  <display-name>Oracle HCM Fusion Web Application </display-name>
   
   <context-param>
     <param-name>contextConfigLocation</param-name>
-    <param-value>/WEB-INF/application.xml</param-value>
+    <param-value>/WEB-INF/integrations.xml</param-value>
 </context-param>
   
   	<listener>
