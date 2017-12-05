@@ -68,6 +68,7 @@ public class PqqFileHandler {
 
 		boolean isPartDone = false;
 		boolean isError = false;
+		boolean skipFile = false;
 		File inProcessingFile = null;
 		File doneFile = null;
 		File partFile = null;
@@ -92,6 +93,7 @@ public class PqqFileHandler {
 
 			if (inProcessingFile.exists() || doneFile.exists()) {
 				logger.warn(">>>>>>>>>>>>>>>>>>>>>>PROCESSING/DONE file found, stop processing file.");
+				skipFile = true;
 				return null;
 			}
 			
@@ -109,12 +111,14 @@ public class PqqFileHandler {
 			errorFile.createNewFile();
 			isError = true;
 		} finally {
-			if (!isError && isPartDone) {
-				partFile.createNewFile();
-			} else if(!isError) {
-				doneFile.createNewFile();
+			if(skipFile==false){
+				if (!isError && isPartDone) {
+					partFile.createNewFile();
+				} else if(!isError) {
+					doneFile.createNewFile();
+				}
+				postProcess( input,  inProcessingFile);
 			}
-			postProcess( input,  inProcessingFile);
 		}
 		
 		
@@ -349,7 +353,7 @@ public class PqqFileHandler {
 	private void postProcess(File input, File inProcessingFile){
 		
 		try{
-			logger.info("postProcess Started. Input File:{}, ProcessingFile:{}", input.getAbsolutePath(), inProcessingFile.getAbsolutePath());
+			logger.info("PostProcess Started. Input File:{}, ProcessingFile:{}", input.getAbsolutePath(), inProcessingFile.getAbsolutePath());
 			//1. Copy Input file to Archive Folder
 			FileMover.handleFile(input, configuration.getFileProcessingDir()+configuration.getPqqDir()+configuration.getPqqArchiveDir());
 			
@@ -364,9 +368,6 @@ public class PqqFileHandler {
 		}
 		
 	}
-	
-	
-	
 	
 	
 	/*

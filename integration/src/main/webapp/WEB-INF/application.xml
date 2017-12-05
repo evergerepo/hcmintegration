@@ -150,7 +150,7 @@
 	<file:inbound-channel-adapter id="pqqFileInbound"
 		channel="pqqInputFileChannel" 
 		filter="pqqFilter" directory="file:${fileProcessingDir}${pqqDir}${pqqInboundDir}" prevent-duplicates="true">
-		<int:poller fixed-rate="120000" />
+		<int:poller fixed-delay="120000" />
 	</file:inbound-channel-adapter>
 
 	<int:service-activator input-channel="pqqInputFileChannel" ref="pqqHandler" method="handleFile" />
