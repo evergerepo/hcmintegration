@@ -33,96 +33,81 @@ public class FileMover {
 	 * Copy file to Output Folder
 	 */
 	public static boolean handleFile(File input, String outputDir) throws IOException {
-		log.info(" Trying to move the file ["+ input.getAbsolutePath()+"] to ["+outputDir+"]");
+		log.info("Moving file from [" + input.getAbsolutePath() + "] to [" + outputDir + "]");
 		boolean isFileMoved = false;
-		try{
-		
-			
+		try {
+
 			String name = input.getName();
 			StringTokenizer tokenizer = new StringTokenizer(name, ".");
 			String extension = null;
-			while(tokenizer.hasMoreTokens()) {
+			while (tokenizer.hasMoreTokens()) {
 				extension = tokenizer.nextToken();
 			}
-			
+
 			File f1 = null;
-			
+
 			// Create directory
 			new File(outputDir).mkdirs();
-			
+
 			f1 = new File(outputDir + FilenameUtils.removeExtension(input.getName()) + "." + extension);
-	
-			if(input.exists()){
+
+			if (input.exists()) {
 				Files.copy(input.toPath(), f1.toPath());
 				isFileMoved = true;
-			}else{
-				log.error("Filenot found for moving file  ["+ input.getAbsolutePath()+"] to ["+outputDir+"]");
+			} else {
+				log.error("Filenot found for moving file  [" + input.getAbsolutePath() + "] to [" + outputDir + "]");
 			}
-			
-			
-			
-		}catch(Exception e){
-			log.error("Error moving the file  ["+ input.getAbsolutePath()+"] to ["+outputDir+"]");
+
+		} catch (Exception e) {
+			log.error("Error moving the file  [" + input.getAbsolutePath() + "] to [" + outputDir + "]");
 		}
 		return isFileMoved;
 	}
-	
 	
 	/*
 	 * Merge list of files to one File
 	 */
 	public static void mergeFiles(List<File> files, File mergedFile) {
 
-	        FileWriter fstream = null;
-	        BufferedWriter out = null;
-			
-	        try
-	        {
-	            fstream = new FileWriter(mergedFile, true);
-	            out = new BufferedWriter(fstream);
-	        }
-	        catch(IOException e1)
-	        {
-	            log.error("Exception while merging files ", e1);
-	        }
-			
-	        log.debug("Merging both the files ");
-			
-	        for(File f : files)
-	        {
-	            FileInputStream fis;
-	            try
-	            {
-	                fis = new FileInputStream(f);
-	                BufferedReader in = new BufferedReader(new InputStreamReader(fis));
-	 
-	                String aLine;
-	                while((aLine = in.readLine()) != null)
-	                {
-	                    out.write(aLine);
-	                    out.newLine();
-	                }
-	 
-	                in.close();
-	            }
-	            catch(IOException e)
-	            {
-	               log.error("Exception while reading the file", e);
-	            }
-	        }
-	        System.out.print("\nMerged Successfully..!!");
-	 
-	        try
-	        {
-	            out.close();
-	        }
-	        catch(IOException e)
-	        {
-	            log.error("Exception while closing the BufferedWriter ", e);
-	        }
-	    
+		FileWriter fstream = null;
+		BufferedWriter out = null;
+
+		try {
+			fstream = new FileWriter(mergedFile, true);
+			out = new BufferedWriter(fstream);
+		} catch (IOException e1) {
+			log.error("Exception while merging files ", e1);
+		}
+
+		log.debug("Merging both the files ");
+
+		for (File f : files) {
+			FileInputStream fis;
+			try {
+				fis = new FileInputStream(f);
+				BufferedReader in = new BufferedReader(new InputStreamReader(fis));
+
+				String aLine;
+				while ((aLine = in.readLine()) != null) {
+					out.write(aLine);
+					out.newLine();
+				}
+
+				in.close();
+			} catch (IOException e) {
+				log.error("Exception while reading the file", e);
+			}
+		}
+		System.out.print("\nMerged Successfully..!!");
+
+		try {
+			out.close();
+		} catch (IOException e) {
+			log.error("Exception while closing the BufferedWriter ", e);
+		}
+
 	}
-	
+
 	/**
 	 * Copy List of Files using Java Path A convenience method, equivalent to
 	 * {@link com.adp.smartconnect.taxcredits.actors.FileWriterActor}

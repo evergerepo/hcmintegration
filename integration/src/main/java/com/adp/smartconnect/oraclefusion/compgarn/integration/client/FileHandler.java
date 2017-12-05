@@ -108,7 +108,7 @@ public class FileHandler  {
 			String contentId  = webContentUpload.uploadContent(uploadDtl.getWebContentUrl(), uploadDtl.getWebContentUserName(), 
 					uploadDtl.getWebContentPwd(), strippedWorkFile.getAbsolutePath());
 			logger.info("STEP2: Upload Lien file to Content Server completd. ContentId: "+contentId);
-			jobTrackingService.trackActivity(transId, jobStepId, "Upload Lien File", "Uploaded Lien file to Content Server. Contect Id:"+contentId);
+			jobTrackingService.trackActivity(transId, jobStepId, "Upload Lien File", "Uploaded Lien file to Content Server. Content Id:"+contentId);
 			
 			// Step3 : Trigger 'Run flow' using Content Id and BatchName and Check status for 'Load Batch' and 'Transfer Batch'
 			triggerRunFlow(contentId, config, strippedWorkFile, clientId, transId, jobStepId);
