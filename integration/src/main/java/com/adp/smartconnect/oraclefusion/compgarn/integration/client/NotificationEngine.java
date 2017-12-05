@@ -74,7 +74,12 @@ public class NotificationEngine {
         String reportPath = notificationInpDir + "/"+ outputFile;
         ServiceClient.callRunReport(notificationReportLocation, paramNameValue, config.getNotificationJobUserName(), config.getNotificationJobPassword(), format, null, reportPath);
 
-        logger.info("End:Report Path is " + reportPath);
+        //Keep Response file as backup in Archive Folder
+        String archiveDir = configuration.getFileProcessingDir() + configuration.getPqqDir()+configuration.getPqqArchiveDir();
+		FileMover.copyFile(notificationInpDir, archiveDir, outputFile);
+		logger.info("Archive Lien Notification File: {}", archiveDir+"/"+outputFile);
+		 
+        logger.info("End:Report Path is {}", reportPath);
 		
 	}
 	

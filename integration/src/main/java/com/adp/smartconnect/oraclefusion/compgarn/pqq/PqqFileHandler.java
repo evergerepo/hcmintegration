@@ -235,8 +235,10 @@ public class PqqFileHandler {
 		try{
 			// Create directory
 			String pqqRespDir = configuration.getFileProcessingDir() + configuration.getPqqDir()+configuration.getPqqOutboundDir();
-			 outputFile = getPQResponseFileName(config);
-			logger.info("Pqq response File: " + outputFile);
+			String archiveDir = configuration.getFileProcessingDir() + configuration.getPqqDir()+configuration.getPqqArchiveDir();
+			
+			outputFile = getPQResponseFileName(config);
+			logger.info("Pqq response File: {}" , outputFile);
 	
 			File file1 = new File(pqqRespDir + "/" + outputFile);
 			JAXBContext jaxbContext1 = JAXBContext.newInstance(PQFile.class);
@@ -253,7 +255,10 @@ public class PqqFileHandler {
 			writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
 			marshaller.marshal(que, writer);
 		
-			logger.info("PQQ Respons file created: File Name:"+file1.getAbsolutePath());
+			//Keep Response file as backup in Archive Folder
+			FileMover.copyFile(pqqRespDir, archiveDir, outputFile);
+
+			logger.info("PQQ Respons file created: File Name:{}", file1.getAbsolutePath());
 		}catch(Exception e){
 			logger.error("Error while creating PQQ Respons file:"+e.getMessage(), e);
 			throw new IOException(e.getCause());

@@ -7,7 +7,11 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -118,6 +122,35 @@ public class FileMover {
 	        }
 	    
 	}
+	
+	/**
+	 * Copy List of Files using Java Path A convenience method, equivalent to
+	 * {@link com.adp.smartconnect.taxcredits.actors.FileWriterActor}
+	 */
+	public static void copyFile(String sourceDir, String targetDir, String fileName) {
+		copyFile(sourceDir +"/"+fileName, targetDir+"/"+fileName);
+	}
+	
+	public static void copyFile(String sourceFile, String targetFile) {
+		if (sourceFile == null || targetFile == null) {
+			log.error("Source/Target File is NULL");
+			return;
+		}
+		try {
+			Path sourcePath = Paths.get(sourceFile);
+			Path targetPath = Paths.get(targetFile);
+			CopyOption[] options = new CopyOption[] { StandardCopyOption.REPLACE_EXISTING,
+					StandardCopyOption.COPY_ATTRIBUTES };
+			Files.copy(sourcePath, targetPath, options);
+			log.info("File Copied from [{}] to [{}]", sourceFile, targetFile);
+		} catch (Exception ex) {
+			log.error("Error copying file. Source Name:" + sourceFile + " , Target File:{}" + targetFile, ex);
+			
+			return;
+		}
+	}
+	
+	
 	
 	public static void main(String[] args) throws IOException {
 		String archiveLocation = "/Users/abhisheksingh/ddrive/everge_ws/pqqArchive/";
