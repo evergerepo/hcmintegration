@@ -43,8 +43,8 @@ public class FileHandler  {
 	 * Handle Input Lien Notification File
 	 * 1. Strip Header/Footer in file
 	 * 2. Upload Lien file to Content Server
-	 * 3. Trigger 'Run flow' using Content Id and BatchName and  Check 'Load Batch' and 'Transfer Batch' status
-	 * 4. Trigger 'Lien Info' and 'Lien Addntl Info' flow and Check 'Load Batch' and 'Transfer Batch' status
+	 * 3. Trigger 'Run flow' submit using Content Id and BatchName and  Check 'Load Batch' and 'Transfer Batch' Flow Instance Status
+	 * 4. Trigger 'Lien Info' and 'Lien Addntl Info' submit flow and Check 'Load Batch' and 'Transfer Batch' Flow Instance Status
 	 * 5. Run Notification Report
 	 * 
 	 */
@@ -93,7 +93,7 @@ public class FileHandler  {
 		inProcessingFile.createNewFile();
 
 		try {
-			//Step1. Remove header and footer and copy file to work dir
+			//Step1. Remove header and footer and copy file to 'work' dir
 			String directory = configuration.getFileProcessingDir() + configuration.getLienDr() + configuration.getLienWorkDir();
 			createStrippedFile(inputFile, fileName, directory);
 			String absoluteStrippedFileName = directory.concat(fileName);
@@ -109,10 +109,10 @@ public class FileHandler  {
 			logger.info("STEP2: Upload Lien file to Content Server completd. ContentId: "+contentId);
 			jobTrackingService.trackActivity(transId, jobStepId, "Upload Lien File", "Uploaded Lien file to Content Server. Contect Id:"+contentId);
 			
-			// Step3 : Trigger 'Run flow' using Content Id and BatchName
+			// Step3 : Trigger 'Run flow' using Content Id and BatchName and Check status for 'Load Batch' and 'Transfer Batch'
 			triggerRunFlow(contentId, config, strippedWorkFile, clientId, transId, jobStepId);
 			logger.info("STEP3: Trigger Third Party Creation Flow Completed");
-			jobTrackingService.trackActivity(transId, jobStepId, "Submit Flow", "Submit Flow Completed. Content ID:"+contentId);
+			jobTrackingService.trackActivity(transId, jobStepId, "Run Submit Flow", "Run Submit Flow Completed. Content ID:"+contentId);
 
 			//Step 4:Trigger 'Lien Info' and 'Additional Lien INfo' and Check status for 'Load Batch' and 'Transfer Batch'
 			List<String> batchNames = triggerLienFlowAndCheckOnStatus(contentId, config, clientId, transId, jobStepId);
@@ -204,7 +204,7 @@ public class FileHandler  {
 		//Get  Flow Status for 'Batch Load' and "Transfer Batch' for 'US Legislative Data Group'
 		String flowInstanceName = batchData.get("flowInstanceName");
 		String batchName = batchData.get("batchName");
-		Map<String, String> flowStatusResponse = getFlowTaskInstanceStatusForBatches(flowInstanceName, jobDtl.getLegislativeDataGroupName(), clientId,  transId,  jobStepId);
+		Map<String, String> flowStatusResponse = getFlowTaskInstanceStatus(flowInstanceName, jobDtl.getLegislativeDataGroupName(), clientId,  transId,  jobStepId);
 		logger.info("Lien Info (ADP Invol Deduction Inbound) Transformation Batch status:{}", ReflectionToStringBuilder.toString(flowStatusResponse));
 		jobTrackingService.trackActivity(transId, jobStepId, "Lien Info (ADP Invol Deduction Inbound)",
 										"Lien Info (ADP Invol Deduction Inbound) completed. Status Response:"+flowStatusResponse);
@@ -222,7 +222,7 @@ public class FileHandler  {
 			
 			
 			String addntlInfoFlowInstanceName = addntlInfoBatchData.get("flowInstanceName");
-			Map<String, String> addntlInfoFlowStatusResponse = getFlowTaskInstanceStatusForBatches(addntlInfoFlowInstanceName, jobDtl.getLegislativeDataGroupName(), clientId, transId,  jobStepId);
+			Map<String, String> addntlInfoFlowStatusResponse = getFlowTaskInstanceStatus(addntlInfoFlowInstanceName, jobDtl.getLegislativeDataGroupName(), clientId, transId,  jobStepId);
 			logger.info("Lien Additional Info(ADP Invol Deduction Additional Inbound) Transformation batch status:{}", ReflectionToStringBuilder.toString(addntlInfoFlowStatusResponse));
 			jobTrackingService.trackActivity(transId, jobStepId, "Lien Additional Info(ADP Invol Deduction Additional Inbound)",
 					"Lien Additional Info(ADP Invol Deduction Additional Inbound) completed. Status Response:"+ReflectionToStringBuilder.toString(addntlInfoFlowStatusResponse));
@@ -261,7 +261,7 @@ public class FileHandler  {
 	/*
 	 * Get Submit Flow Status for 'Load Batch' and 'Transfer Batch' using Flow Name
 	 */
-	private Map<String, String> getFlowTaskInstanceStatusForBatches(String flowInstanceName, String legislativeDataGroupName, String clientId, String transId, String jobStepId) throws Exception {
+	private Map<String, String> getFlowTaskInstanceStatus(String flowInstanceName, String legislativeDataGroupName, String clientId, String transId, String jobStepId) throws Exception {
 		Map<String, String> finaResult = new HashMap<>();
 		finaResult.put("batchload", "FAILED");
 		finaResult.put("transferbatch", "FAILED");
@@ -299,14 +299,16 @@ public class FileHandler  {
 			
 			//Invoke 'Run Flow' Task
 			Map<String, String> batchData = batchLoadTask.invokeSubmitFlow(contentId, jobDtl.getThirdPartyTransformationFormula(), clientId);
-			logger.info("Notification JobSubmit Flow Completed. Batch Info:{}", batchData);
-			jobTrackingService.trackActivity(transId, jobStepId, "Notification JobSubmit Flow", "Notification JobSubmit Flow Completed. Batch Info:"+batchData);
+			logger.info("Run Submit Flow Completed. Batch Info:{}", batchData);
+			jobTrackingService.trackActivity(transId, jobStepId, "Run Submit Flow", "Run Submit Flow Completed. Batch Info:"+batchData);
 			
 			//Check Status for 'Run Flow'
 			String flowInstanceName = batchData.get("flowInstanceName");
 			String batchName = batchData.get("batchName");
-			flowStatusResponse = getFlowTaskInstanceStatusForBatches(flowInstanceName, jobDtl.getLegislativeDataGroupName(), clientId, transId,  jobStepId);
-			logger.info("The flow status response for file {} and the batch name {} is "+flowStatusResponse, child.getName() , batchName);
+			flowStatusResponse = getFlowTaskInstanceStatus(flowInstanceName, jobDtl.getLegislativeDataGroupName(), clientId, transId,  jobStepId);
+			logger.info("Run Submit Load/Transfer batch completed. The flow status response for file {} and the batch name {} is "+flowStatusResponse, child.getName() , batchName);
+			jobTrackingService.trackActivity(transId, jobStepId, "Run Submit Batch Flow",
+					"Run Submit Load/Transfer batch completed. Status Response:"+ReflectionToStringBuilder.toString(flowStatusResponse));
 			
 		}catch(Exception exc) {
 			logger.error("Error calling "+ config.getNotificationJobDtl().getThirdPartyTransformationFormula()+" Service. Error:"+exc.getMessage(), exc);

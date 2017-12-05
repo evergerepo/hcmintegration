@@ -349,6 +349,7 @@ public class PqqFileHandler {
 	private void postProcess(File input, File inProcessingFile){
 		
 		try{
+			logger.info("postProcess Started. Input File:{}, ProcessingFile:{}", input.getAbsolutePath(), inProcessingFile.getAbsolutePath());
 			//1. Copy Input file to Archive Folder
 			FileMover.handleFile(input, configuration.getFileProcessingDir()+configuration.getPqqDir()+configuration.getPqqArchiveDir());
 			

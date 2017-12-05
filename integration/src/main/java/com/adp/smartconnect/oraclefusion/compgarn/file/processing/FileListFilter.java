@@ -99,15 +99,6 @@ public class FileListFilter<F> extends AbstractFileListFilter<F> {
 		
 	}
 	
-	public static void main(String[] args) {
-		File f = new File("/Users/abhisheksingh/ddrive/everge_ws/f/Sample Lien File-112916-NEW.txt");
-//		EvergeFileListFilter<File> obj = new EvergeFileListFilter<>();
-//		obj.accept(f);
-		
-	    FileListFilter<File> filter = new LienFileFilter<>();
-		boolean x = filter.shouldFilebeAccepted(f);
-		System.out.println("x is " + x);
-	}
 
 	public Configuration getConfiguration() {
 		return configuration;
