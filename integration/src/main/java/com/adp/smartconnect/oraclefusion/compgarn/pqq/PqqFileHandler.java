@@ -272,14 +272,15 @@ public class PqqFileHandler {
 			clientName = fileName.substring(0, 4).toLowerCase();
 			logger.info("The client id in Pqq is :{}" , clientName);
 			
-			//Create Job Event/Steps
-			jobTrackingService.trackStartJob(CGConstants.JOB_PQQ_NAME, clientName, fileName, transId, jobStepId, CGConstants.JOB_STEP_PQQ_NAME);
-
 			ClientConfiguration config = clientConfigurations.getSingleClientData(clientName);
 			if(config==null){
+				jobTrackingService.trackStartJob(CGConstants.JOB_PQQ_NAME, clientName, fileName, transId, jobStepId, CGConstants.JOB_STEP_PQQ_NAME);
 				jobTrackingService.trackException(transId, jobStepId,  "ClientConfiguration", "ClientConfiguration set-up is missing. Client Id:"+clientName);
 				new Exception("ClientConfiguration set-up is missing. Client Id:"+clientName);
 			}
+			
+			//Create Job Event/Steps
+			jobTrackingService.trackStartJob(config.getClientName(), clientName, fileName, transId, jobStepId, CGConstants.JOB_STEP_PQQ_NAME);
 			
 			// Get the UTF 8 File
 			File utf8File = getUTF8File(input);//Check this is required TODO
@@ -332,8 +333,7 @@ public class PqqFileHandler {
 	
 			// Create the response file
 			String responseFile = createPQQResponseFile(config, pqFile);
-			jobTrackingService.trackActivity(transId, jobStepId, "PQQ Response", 
-					"PQQ Response File Generated. File Name:["+responseFile+"]");
+			jobTrackingService.trackActivity(transId, jobStepId, "PQQ Response","PQQ Response File Generated. File Name:["+responseFile+"]");
 		
 		}catch(Exception exc){
 			logger.error("handleFile() Exception in PqqFileHandler. Message: "+exc.getMessage(), exc);

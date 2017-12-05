@@ -77,17 +77,18 @@ public class FileHandler  {
 		
 		String clientId = getClientId(fileName);
 		logger.info("The client id in Lien  is :" + clientId);
-		
-		//Create Job Event/Steps
-		jobTrackingService.trackStartJob(CGConstants.JOB_LIEN_NAME, clientId, fileName, transId, jobStepId, CGConstants.JOB_STEP_LIEN_NAME);
 
 		// Retrieve Client Configuration
 		ClientConfiguration config = clientConfigurations.getSingleClientData(clientId);
 		if(config==null){
+			jobTrackingService.trackStartJob(CGConstants.JOB_LIEN_NAME, clientId, fileName, transId, jobStepId, CGConstants.JOB_STEP_LIEN_NAME);
 			jobTrackingService.trackException(transId, jobStepId,  "ClientConfiguration", "ClientConfiguration set-up is missing. Client Id:"+clientId);
 			logger.error("ClientConfiguration set-up is missing, stop process. Client Id:{}", clientId);
 			return null;
 		}
+		
+		//Create Job Event/Steps
+		jobTrackingService.trackStartJob(config.getClientName(), clientId, fileName, transId, jobStepId, CGConstants.JOB_STEP_LIEN_NAME);
 		
 		// Create in processing file
 		inProcessingFile.createNewFile();

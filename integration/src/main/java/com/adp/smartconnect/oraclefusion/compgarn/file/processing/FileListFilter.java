@@ -7,13 +7,13 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.integration.file.filters.AbstractFileListFilter;
 
 import com.adp.smartconnect.oraclefusion.compgarn.config.Configuration;
+import com.adp.smartconnect.oraclefusion.compgarn.util.CommonUtil;
 
 public class FileListFilter<F> extends AbstractFileListFilter<F> {
 
@@ -25,21 +25,15 @@ public class FileListFilter<F> extends AbstractFileListFilter<F> {
 	protected boolean accept(F file) {
 		
 		File f = (File) file;
-		MDC.put("transId", f.getName()+":"+RandomStringUtils.randomNumeric(10));
-		log.info("Input File : ["+f.getAbsolutePath()+"]");
-		
 		if(f.getName().startsWith(".")) {
 			log.debug("File is hidden file.... Ignore File");
 			return false;
 		}
 		
-		if(f.getAbsolutePath().contains(".working") || f.getAbsolutePath().contains(".writing")) {
-			log.warn("File is Working file. Wait for some time to complete process......");
-			return false;
-		}
-		
+		MDC.put("transId", CommonUtil.generateId());
+		MDC.put("fileName", f.getName());
+		log.info("Input File : ["+f.getAbsolutePath()+"]");
 		return true;
-		
 	}
 	
 	protected void removeFile(File input) {
