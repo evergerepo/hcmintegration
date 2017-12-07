@@ -135,7 +135,7 @@ public class JobTrackingGateway {
 	        } 
     }
 
-    private JSONArray getWarningArrays(Map<Integer, String> warnings) {
+    private JSONArray getWarningArrays(Map<Integer, String> warnings) throws Exception{
         log.trace("Received warning/errors :: " + warnings);
         JSONArray warningsArray = new JSONArray();
         if (warnings == null || warnings.isEmpty())
