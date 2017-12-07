@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 @SpringBootApplication
 @ComponentScan("com.adp.smartconnect.oraclefusion.compgarn")
 @Slf4j
-@ImportResource("/spring/integrations.xml")
+@ImportResource("classpath:spring/integrations.xml")
 public class OracleCompGarnApplication extends SpringBootServletInitializer {
 	
 	
