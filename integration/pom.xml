@@ -30,26 +30,6 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
-	
-	<profiles>
-	
-		<profile>
-			<id>dev</id>
-	        <activation>
-	            <activeByDefault>true</activeByDefault>
-	        </activation>
-	        <properties>
-	            <build.profile.id>dev</build.profile.id>
-	        </properties>
-		</profile>
-		<profile>
-			<id>prod</id>
-	        <properties>
-	            <build.profile.id>prod</build.profile.id>
-	        </properties>
-		</profile>
-	
-	</profiles>
 
 	<build>
 		<plugins>
@@ -67,10 +47,6 @@
             <version>2.4</version>
             <configuration>
                 <webResources>
-                    <resource>
-                        <directory>profiles/${build.profile.id}</directory>
-                        <targetPath>WEB-INF/classes</targetPath>
-                    </resource>
                     <resource>
                         <directory>src/main/resources</directory>
                         <targetPath>WEB-INF/classes</targetPath>

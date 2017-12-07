@@ -1,1 +1,0 @@
-Place client configurations here.
