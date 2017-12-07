@@ -9,7 +9,7 @@ test-output
 */.*
 buildNumber.properties
 
-
+catalina.base_IS_UNDEFINED
 
 # IDEs
 *.iml

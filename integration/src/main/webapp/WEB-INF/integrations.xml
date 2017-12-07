@@ -87,7 +87,7 @@
 		<beans:property name="configuration" ref="config"></beans:property>
 	</beans:bean>
 
-	<beans:bean id="pqqHandler" scope="prototype"  class="com.adp.smartconnect.oraclefusion.compgarn.pqq.PqqFileHandler">
+	<beans:bean id="pqqHandler" class="com.adp.smartconnect.oraclefusion.compgarn.pqq.PqqFileHandler">
 		<beans:property name="configuration" ref="config"></beans:property>
 		<beans:property name="clientConfigurations" ref="clientConfigurations"></beans:property>
 		

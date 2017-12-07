@@ -7,9 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.adp.smartconnect.oraclefusion.compgarn.listeners.ClientConfigHolder;
@@ -25,8 +27,8 @@ public class PQQController {
 	/**
 	 * This service is used to re-loading client profiles
 	 */
-	@PostMapping(path = "/pqqProcess")
-	public  String pqqProcess(@RequestBody Map<String, String> files) {
+	@RequestMapping(path = "/pqqProcess", method = {RequestMethod.POST}, produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody String pqqProcess(@RequestBody Map<String, String> files) {
 		String fileName = files.get("fileName");
 		Boolean processed = false;
 		String transId = null;
