@@ -52,7 +52,7 @@ public class FileUtilController {
 		String fileName = files.get("fileName");
 		LOGGER.info("deleteFile Start. File:"+fileName);
 		try{
-			FileUtils.forceDeleteOnExit(new File(fileName));
+			FileUtils.forceDelete(new File(fileName));
 			LOGGER.info("deleteFile Complete. File:"+fileName);
 		}catch(Exception e){
 			LOGGER.info("deleteFile Error. Message:"+e.getMessage(), e);

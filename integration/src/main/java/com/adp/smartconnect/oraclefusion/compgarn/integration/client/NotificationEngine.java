@@ -75,7 +75,7 @@ public class NotificationEngine {
         ServiceClient.callRunReport(notificationReportLocation, paramNameValue, config.getNotificationJobUserName(), config.getNotificationJobPassword(), format, null, reportPath);
 
         //Keep Response file as backup in Archive Folder
-        String archiveDir = configuration.getFileProcessingDir() + configuration.getPqqDir()+configuration.getPqqArchiveDir();
+        String archiveDir = configuration.getFileProcessingDir() + configuration.getLienDr()+configuration.getLienArchiveDir();
 		FileMover.copyFile(notificationInpDir, archiveDir, outputFile);
 		logger.info("Archive Lien Notification File: {}", archiveDir+"/"+outputFile);
 		 

@@ -1,0 +1,33 @@
+<ClientConfiguration>
+	<ClientName>Shaner</ClientName>
+	<ClientId>sha2</ClientId>
+	<WebContentUploadDetails>
+		<WebContentUrl>https://ebwvdev-test.fs.us2.oraclecloud.com/cs/idcplg</WebContentUrl>
+		<WebContentUserName>adp_user</WebContentUserName>
+		<WebContentPwd>Welcome@123</WebContentPwd>
+	</WebContentUploadDetails>
+	<NotificationJobDtl>
+		<NotificationJobUserName>adp_user</NotificationJobUserName>
+		<NotificationJobPassword>Welcome@123</NotificationJobPassword>
+		<NotificationJobKeyStorePath>/everge.jks</NotificationJobKeyStorePath>
+		<NotificationJobKeyStorePwd>welcome</NotificationJobKeyStorePwd>
+		<ReportServiceUrl>https://ebwvdev-test.fs.us2.oraclecloud.com/xmlpserver/services/v2/ReportService?wsdl</ReportServiceUrl>
+		<NotificationJobSubmitFlowUrl>https://ebwvdev-test.fs.us2.oraclecloud.com/hcmProcFlowCoreController/FlowActionsService?WSDl</NotificationJobSubmitFlowUrl>
+		<NotificationJobGetFlowStatusUrl>https://ebwvdev-test.fs.us2.oraclecloud.com/hcmProcFlowCoreController/FlowActionsService?WSDl</NotificationJobGetFlowStatusUrl>
+         <NotificationReportPath>/Custom Reports/ADP/ADP Garnishments Inbound/ADP_Notification_Report.xdo</NotificationReportPath>
+        <NotificationOutputFormat>xxx.wgps.yyyymmddhhmmss.ntf</NotificationOutputFormat>
+		<LegislativeDataGroupName>US Legislative Data Group</LegislativeDataGroupName>
+		<LienInfoTransformationFormula>ADP Invol Deduction Inbound</LienInfoTransformationFormula>
+		<LienAddntlInfoTransformationFormula>ADP Invol Deduction Additional Inbound</LienAddntlInfoTransformationFormula>
+		<LienEndDtTransformationFormula>ADP Update Lien Information</LienEndDtTransformationFormula>
+	</NotificationJobDtl>
+	<PqqFileDetails>
+		<PqqUrl>https://ecbfdev1-test.fs.us8.oraclecloud.com/xmlpserver/services/v2/ReportService?wsdl</PqqUrl>
+		<PqqUsername>adp_user</PqqUsername>
+		<PqqPassword>Welcome@123</PqqPassword>
+		<PqqReportPath>/Custom/Custom Reports/ADP/PQQ/PQQv1.25 Report.xdo</PqqReportPath>
+		<PqqFormat>xml</PqqFormat>
+		<PqqLocale>en-US</PqqLocale>
+		<PqqOutputFormat>xxx.wgps.yyyymmddhhmmss.pqq</PqqOutputFormat>
+	</PqqFileDetails>
+</ClientConfiguration>

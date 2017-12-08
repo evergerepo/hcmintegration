@@ -1,0 +1,36 @@
+<ClientConfiguration>
+	<ClientName>ADPTestClient</ClientName>
+	<ClientId>adp1</ClientId>
+	<WebContentUploadDetails>
+		<WebContentUrl>https://hcwh-test.fs.ap1.oraclecloud.com/cs/idcplg</WebContentUrl>
+		<WebContentUserName>HCMUSER</WebContentUserName>
+		<WebContentPwd>Cloud2World!</WebContentPwd>
+	</WebContentUploadDetails>
+	<NotificationJobDtl>
+		<NotificationJobUserName>HCMUser</NotificationJobUserName>
+		<NotificationJobPassword>Cloud2World!</NotificationJobPassword>
+		<NotificationJobKeyStorePath>/everge.jks</NotificationJobKeyStorePath>
+		<NotificationJobKeyStorePwd>welcome</NotificationJobKeyStorePwd>
+		<ReportServiceUrl>https://hcwh-test.bi.ap1.oraclecloud.com/xmlpserver/services/v2/ReportService?wsdl</ReportServiceUrl>
+		<NotificationJobSubmitFlowUrl>https://hcwh-test.hcm.ap1.oraclecloud.com/hcmProcFlowCoreController/FlowActionsService?WSDl</NotificationJobSubmitFlowUrl>
+		<NotificationJobGetFlowStatusUrl>https://hcwh-test.hcm.ap1.oraclecloud.com/hcmProcFlowCoreController/FlowActionsService?WSDl</NotificationJobGetFlowStatusUrl>		
+		<NotificationReportPath>/Custom/Human Capital Management/Reports/Payroll/ADP_Notification_Report.xdo</NotificationReportPath>
+		<NotificationOutputFormat>xxx.wgps.yyyymmddhhmmss.ntf</NotificationOutputFormat>
+		<ThirdPartyTransformationFormula>ADP Third Party Inbound</ThirdPartyTransformationFormula>
+		<LegislativeDataGroupName>US Legislative Data Group</LegislativeDataGroupName>
+		<LienInfoTransformationFormula>ADP Invol Deduction Inbound</LienInfoTransformationFormula>
+		<LienAddntlInfoTransformationFormula>ADP Invol Deduction Additional Inbound</LienAddntlInfoTransformationFormula>
+		<LienEndDtTransformationFormula>ADP Update Lien Information</LienEndDtTransformationFormula>
+	</NotificationJobDtl>
+	<PqqFileDetails>	
+		<PqqUrl>https://hcwh-test.bi.ap1.oraclecloud.com/xmlpserver/services/v2/ReportService?wsdl</PqqUrl>
+		<PqqUsername>HCMUser</PqqUsername>
+		<PqqPassword>Cloud2World!</PqqPassword>
+		<CronTrigger></CronTrigger>
+		<FixedDelay>1000</FixedDelay>
+		<PqqReportPath>/Custom/Human Capital Management/Reports/Payroll/PQQ/TEST/PQQv1.25 Report.xdo</PqqReportPath>
+		<PqqFormat>xml</PqqFormat>
+		<PqqLocale>en-US</PqqLocale>
+		<PqqOutputFormat>xxx.wgps.yyyymmddhhmmss.pqq</PqqOutputFormat>
+	</PqqFileDetails>
+</ClientConfiguration>

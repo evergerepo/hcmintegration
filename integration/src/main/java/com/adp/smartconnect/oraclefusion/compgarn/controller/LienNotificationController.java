@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.adp.smartconnect.oraclefusion.compgarn.clientConfiguration.ClientConfiguration;
 import com.adp.smartconnect.oraclefusion.compgarn.clientConfiguration.WebContentUploadDetails;
 import com.adp.smartconnect.oraclefusion.compgarn.contentupload.WebContentUpload;
+import com.adp.smartconnect.oraclefusion.compgarn.integration.client.FileHandler;
 import com.adp.smartconnect.oraclefusion.compgarn.listeners.ClientConfigHolder;
 
 @RestController
@@ -25,6 +26,27 @@ import com.adp.smartconnect.oraclefusion.compgarn.listeners.ClientConfigHolder;
 public class LienNotificationController {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(LienNotificationController.class);
+	
+
+	/**
+	 * This service is used to re-loading client profiles
+	 */
+	@RequestMapping(path = "/lienProcess", method = {RequestMethod.POST}, produces = MediaType.APPLICATION_JSON_VALUE)
+	public  @ResponseBody String lienProcess(@RequestBody Map<String, String> files) {
+		String fileName = files.get("fileName");
+		String transId = null;
+		try{
+			LOGGER.info("lienProcess Start. File Name:{}", fileName);
+			File file = new File(fileName);
+			fileHandler.handleFile(file);	
+			LOGGER.info("lienProcess Complete.");
+		}catch(Exception e){
+			LOGGER.info("lienProcess ERROR. Message:"+e.getMessage(), e);
+		}
+		MDC.clear();
+		return transId;
+	}
+	
 	
 	/**
 	 * This service is used to re-loading client profiles
@@ -84,5 +106,6 @@ public class LienNotificationController {
 	
 	
 	@Autowired private ClientConfigHolder clientConfigurations;
+	@Autowired FileHandler fileHandler;
 	
 }
