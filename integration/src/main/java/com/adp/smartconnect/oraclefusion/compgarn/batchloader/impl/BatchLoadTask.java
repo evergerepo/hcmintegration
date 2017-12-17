@@ -36,12 +36,9 @@ import com.oracle.xmlns.apps.hcm.processflows.core.flowcontrollerservice.ObjectF
 public class BatchLoadTask extends WebServiceGatewaySupport {
 	
 	private static final Logger log = LoggerFactory.getLogger(BatchLoadTask.class);
+	
+	public Map<String, String> invokeSubmitFlow(String contentId, String flowName, String clientId, String batchName) throws Exception {
 
-	/*
-	 * Submits a flow instance.
-	 * Invoke  Submit Flow using Content ID, Batch Name and Flow Name.
-	 */
-	public Map<String, String> invokeSubmitFlow(String contentId, String flowName, String clientId) throws Exception {
 		
 		if(StringUtils.isNotBlank(contentId)) {
 			log.info("invokeSubmitFlow Start. FlowName:"+flowName+", contentId:"+contentId);
@@ -59,7 +56,10 @@ public class BatchLoadTask extends WebServiceGatewaySupport {
 			String formattedDate = sdf.format(Calendar.getInstance().getTime());
 			
 			String flowInstanceName = flowName + formattedDate;
-			String batchName = BatchLoadTaskConstants.ADP_BATCH_NAME + formattedDate;
+			if(StringUtils.isBlank(batchName)) {
+				batchName = BatchLoadTaskConstants.ADP_BATCH_NAME + formattedDate;
+			}
+
 			response.put("batchName", batchName);
 			response.put("flowInstanceName", flowInstanceName);
 			
@@ -101,6 +101,16 @@ public class BatchLoadTask extends WebServiceGatewaySupport {
         	throw e;
         }
 		return response;
+		
+	}
+	
+
+	/*
+	 * Submits a flow instance.
+	 * Invoke  Submit Flow using Content ID, Batch Name and Flow Name.
+	 */
+	public Map<String, String> invokeSubmitFlow(String contentId, String flowName, String clientId) throws Exception {
+		return invokeSubmitFlow(contentId, flowName, clientId, null);
 	}
 	
 	
