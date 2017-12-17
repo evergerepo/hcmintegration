@@ -21,6 +21,7 @@
 		<LienInfoTransformationFormula>ADP Invol Deduction Inbound</LienInfoTransformationFormula>
 		<LienAddntlInfoTransformationFormula>ADP Invol Deduction Additional Inbound</LienAddntlInfoTransformationFormula>
 		<LienEndDtTransformationFormula>ADP Update Lien Information</LienEndDtTransformationFormula>
+		<PayRollFormula>ADP Lien Report Flow</PayRollFormula>
 	</NotificationJobDtl>
 	<PqqFileDetails>
 		<PqqUrl>https://ecbfdev1-test.fs.us8.oraclecloud.com/xmlpserver/services/v2/ReportService?wsdl</PqqUrl>
