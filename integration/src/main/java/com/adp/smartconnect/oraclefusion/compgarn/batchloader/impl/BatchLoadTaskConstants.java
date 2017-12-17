@@ -16,4 +16,5 @@ public class BatchLoadTaskConstants {
 	public static final String BATCHLOAD_COMPLETETD_STATUS = "COMPLETED";
 	public static final String BATCHLOAD_NOTSTARTED_STATUS = "NOT_STARTED";
 	public static final String BATCHLOAD_SUBMITTED_STATUS = "ESS_CHILD_JOB_SUBMITTED";
+	public static final String PAYROLLFLOW_FLOWTASKINSTANCENAME = "Run BI Publisher Report";
 }
