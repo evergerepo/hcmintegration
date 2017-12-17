@@ -50,6 +50,9 @@ public class NotificationJobDtl {
 	
 	@XmlElement(name="NotificationOutputFormat")
 	private String NotificationOutputFormat;
+	
+	@XmlElement(name="PayRollFormula")
+	private String PayRollFormula;
 
 	public String getNotificationJobUserName() {
 		return NotificationJobUserName;
@@ -161,6 +164,14 @@ public class NotificationJobDtl {
 
 	public void setThirdPartyTransformationFormula(String thirdPartyTransformationFormula) {
 		this.thirdPartyTransformationFormula = thirdPartyTransformationFormula;
+	}
+	
+	public String getPayRollFormula() {
+		return PayRollFormula;
+	}
+
+	public void setPayRollFormula(String payRollFormula) {
+		PayRollFormula = payRollFormula;
 	}
 
 }
