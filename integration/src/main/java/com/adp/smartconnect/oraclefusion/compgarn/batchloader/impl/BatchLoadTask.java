@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.net.ssl.KeyManagerFactory;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -42,7 +43,12 @@ public class BatchLoadTask extends WebServiceGatewaySupport {
 	 */
 	public Map<String, String> invokeSubmitFlow(String contentId, String flowName, String clientId) throws Exception {
 		
-		log.info("invokeSubmitFlow Start. FlowName:"+flowName+", contentId:"+contentId);
+		if(StringUtils.isNotBlank(contentId)) {
+			log.info("invokeSubmitFlow Start. FlowName:"+flowName+", contentId:"+contentId);
+		}else {
+			log.info("invokeSubmitFlow Start. FlowName:"+flowName+", contentId is blank.");
+		}
+		
 		Map<String, String> response = new HashMap<>();
 		
 		try{
@@ -89,7 +95,6 @@ public class BatchLoadTask extends WebServiceGatewaySupport {
 
 	        log.debug("Invoking SubmitFlow WebService");
         	SubmitFlowResponse flowResponse = (SubmitFlowResponse)getWebServiceTemplate().marshalSendAndReceive(jobDtl.getNotificationJobSubmitFlowUrl(), submitFlowRequest);
-
         	logger.info("invokeSubmitFlow End. FlowInstanceName:"+flowInstanceName+", BatchName:"+batchName+", Response:"+flowResponse.isResult());
         }catch(Exception e){
         	logger.error("invokeSubmitFlow Error. Message:"+e.getMessage(), e);
@@ -110,16 +115,18 @@ public class BatchLoadTask extends WebServiceGatewaySupport {
 			
 			ObjectFactory factory = new ObjectFactory();
 			
-			FlowParameterNameValues values1 = new FlowParameterNameValues();
-			values1.setParameterName(factory.createFlowParameterNameValuesParameterName("Content Id"));
-			values1.setParameterValue(factory.createFlowParameterNameValuesParameterValue(contentId));
+			if(StringUtils.isNotBlank(contentId)) {
+				FlowParameterNameValues values1 = new FlowParameterNameValues();
+				values1.setParameterName(factory.createFlowParameterNameValuesParameterName("Content Id"));
+				values1.setParameterValue(factory.createFlowParameterNameValuesParameterValue(contentId));
+				submitFlowRequest.getParameterValues().add(values1);
+			}
 			
 			FlowParameterNameValues values2 = new FlowParameterNameValues();
 			values2.setParameterName(factory.createFlowParameterNameValuesParameterName("Batch"));
 			values2.setParameterValue(factory.createFlowParameterNameValuesParameterValue(batchName));
-			
-			submitFlowRequest.getParameterValues().add(values1);
 			submitFlowRequest.getParameterValues().add(values2);
+			
 			submitFlowRequest.setFlowInstanceName(flowInstanceName);
 			submitFlowRequest.setLegislativeDataGroupName(legislativeDataGroupName);
 			submitFlowRequest.setRecurringFlag(recurringFlag);
