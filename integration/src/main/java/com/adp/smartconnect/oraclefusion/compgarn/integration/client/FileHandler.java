@@ -327,7 +327,7 @@ public class FileHandler  {
 		logger.info("invokePayRollFlow Batch Name is " + batchName);
 		NotificationJobDtl jobDtl = config.getNotificationJobDtl();
 		
-		Map<String, String> responseData = batchLoadTask.invokeSubmitFlow(null, jobDtl.getPayRollFormula(), clientId);
+		Map<String, String> responseData = batchLoadTask.invokeSubmitFlow(null, jobDtl.getPayRollFormula(), clientId, batchName);
 		jobTrackingService.trackActivity(transId, jobStepId, "Payroll Submit Flow", "Payroll Submit Flow. Batch Data:"+responseData);
 		
 		String flowInstanceName = responseData.get("flowInstanceName");
