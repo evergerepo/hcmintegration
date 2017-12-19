@@ -6,11 +6,13 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.adp.smartconnect.oraclefusion.compgarn.clientConfiguration.ClientConfiguration;
 import com.adp.smartconnect.oraclefusion.compgarn.clientConfiguration.NotificationJobDtl;
 import com.adp.smartconnect.oraclefusion.compgarn.config.Configuration;
 import com.adp.smartconnect.oraclefusion.compgarn.listeners.ClientConfigHolder;
+import com.adp.smartconnect.oraclefusion.compgarn.service.JobTrackingService;
 
 import bip_webservice.proxy.types.ArrayOfParamNameValue;
 import bip_webservice.proxy.types.ArrayOfString;
@@ -23,13 +25,14 @@ public class NotificationEngine {
 	private Configuration configuration;
 		
 	private ClientConfigHolder clientConfigurations;
+	@Autowired  JobTrackingService jobTrackingService;
 	
 	private static final Logger logger = LoggerFactory.getLogger(NotificationEngine.class);
 
 	/*
 	 * Batch Notification Flow
 	 */
-	public void invokeBatchNotificationFlow(String dirName, List<String> batchNames, String clientName) throws Exception {
+	public void invokeBatchNotificationFlow(String dirName, List<String> batchNames, String clientName, String transId, String jobStepId) throws Exception {
 
 		// Retrieve Client Configuration
 		ClientConfiguration clientConfiguration = clientConfigurations.getSingleClientData(clientName);
@@ -40,12 +43,13 @@ public class NotificationEngine {
 		String notificationReportLocation = config.getNotificationReportPath();
 		
 		for (String name : batchNames) {
-			invokeNotificationFlow(clientConfiguration, name, notificationInpDir, notificationReportLocation, clientName);
+			invokeNotificationFlow(clientConfiguration, name, notificationInpDir, notificationReportLocation, clientName,  transId,  jobStepId);
 		}
 
 	}
 	
-	private void invokeNotificationFlow(ClientConfiguration clientConfiguration, String batchName, String notificationInpDir, String notificationReportLocation, String clientName) throws Exception {
+	private void invokeNotificationFlow(ClientConfiguration clientConfiguration, String batchName, String notificationInpDir, 
+			String notificationReportLocation, String clientName, String transId, String jobStepId) throws Exception {
 		
 		logger.info("Start:invokeNotificationFlow for batch name is " + batchName);
 		ArrayOfString value = new ArrayOfString();
@@ -74,6 +78,8 @@ public class NotificationEngine {
         String reportPath = notificationInpDir + "/"+ outputFile;
         ServiceClient.callRunReport(notificationReportLocation, paramNameValue, config.getNotificationJobUserName(), config.getNotificationJobPassword(), format, null, reportPath);
 
+        jobTrackingService.trackActivity(transId, jobStepId, "Lien Notification Response","Lien Notification Response File Generated. File Name:["+outputFile+"]");
+        
         //Keep Response file as backup in Archive Folder
         String archiveDir = configuration.getFileProcessingDir() + configuration.getLienDr()+configuration.getLienArchiveDir();
 		FileMover.copyFile(notificationInpDir, archiveDir, outputFile);

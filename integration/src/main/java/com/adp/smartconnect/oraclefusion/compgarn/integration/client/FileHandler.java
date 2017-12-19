@@ -3,9 +3,7 @@ package com.adp.smartconnect.oraclefusion.compgarn.integration.client;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,15 +115,17 @@ public class FileHandler  {
 			logger.info("STEP3: Trigger Third Party Creation Flow Completed");
 			jobTrackingService.trackActivity(transId, jobStepId, "Run Submit Flow", "Run Submit Flow Completed. Content ID:"+contentId);
 
-			//Step 4:Trigger 'Lien Info' and 'Additional Lien INfo' and Check status for 'Load Batch' and 'Transfer Batch'
+			//Step 4:Trigger 'Lien Info' and 'Additional Lien Info' and Check status for 'Load Batch' and 'Transfer Batch'
 			List<String> batchNames = triggerLienFlowAndCheckOnStatus(contentId, config, clientId, transId, jobStepId);
 			logger.info("STEP4: Lien Info/Lien Addntl Info Flow Completed. BatchNames:{}", batchNames);
 
 			// Step 6: Invoke the notification flow (Run Notification Report)
 			if(!batchNames.isEmpty()) {			
-				notifEngine.invokeBatchNotificationFlow(dirName, batchNames, clientId);
+				notifEngine.invokeBatchNotificationFlow(dirName, batchNames, clientId, transId, jobStepId);
 				jobTrackingService.trackActivity(transId, jobStepId, "Batch Notification", "Batch Notification Completed. Batch Names:"+batchNames);
 				triggerPayRollFlowAndCheckOnStatus(config, clientId, batchNames.get(0),transId, jobStepId);
+			}else{
+				logger.error("BatchNames are Empty. Check errors in HCM");
 			}
 					
 			doneFile.createNewFile();
@@ -324,7 +324,7 @@ public class FileHandler  {
 	
 	private String triggerPayRollFlowAndCheckOnStatus(ClientConfiguration config, String clientId, String batchName, String transId, 
 			String jobStepId) throws Exception {
-		logger.info("invokePayRollFlow Batch Name is " + batchName);
+		logger.info("invokePayRollFlow Batch Name is :{}" , batchName);
 		NotificationJobDtl jobDtl = config.getNotificationJobDtl();
 		
 		Map<String, String> responseData = batchLoadTask.invokeSubmitFlow(null, jobDtl.getPayRollFormula(), clientId, batchName);
@@ -335,7 +335,7 @@ public class FileHandler  {
 				BatchLoadTaskConstants.PAYROLLFLOW_FLOWTASKINSTANCENAME, clientId);
 		jobTrackingService.trackActivity(transId, jobStepId, "Payroll Submit Flow", "Payroll Submit Flow Status Response: "+flowStatusResponse);
 		
-		logger.info("The payroll flow status response for the batch name "+ batchName +" is " + flowStatusResponse);
+		logger.info("The payroll flow status response for the batch name [{}] is [{}]", batchName, flowStatusResponse);
 		return flowStatusResponse;
 	}
 	
