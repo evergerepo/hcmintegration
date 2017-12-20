@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.net.ssl.KeyManagerFactory;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -72,6 +73,7 @@ public class BatchLoadTask extends WebServiceGatewaySupport {
 			getWebServiceTemplate().setMarshaller(marshaller);
 			getWebServiceTemplate().setUnmarshaller(marshaller);
 			
+			log.info(">>>>>>>NotificationJobDtl :{}", ReflectionToStringBuilder.toString(jobDtl));
 
 			//Load JKS Key into KeyStore
 			Resource keyStore = new ClassPathResource(jobDtl.getNotificationJobKeyStorePath());

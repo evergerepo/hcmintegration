@@ -105,6 +105,7 @@ public class FileHandler  {
 			
 			// Step2 : Upload the file to the content server
 			WebContentUploadDetails uploadDtl = config.getWebContentUploadDtl();
+			logger.info("WebContentUploadDetails :{}" , ReflectionToStringBuilder.toString(uploadDtl));
 			String contentId  = webContentUpload.uploadContent(uploadDtl.getWebContentUrl(), uploadDtl.getWebContentUserName(), 
 					uploadDtl.getWebContentPwd(), strippedWorkFile.getAbsolutePath());
 			logger.info("STEP2: Upload Lien file to Content Server completd. ContentId: "+contentId);
