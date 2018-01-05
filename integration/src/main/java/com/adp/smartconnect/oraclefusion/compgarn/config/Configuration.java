@@ -4,8 +4,6 @@ public class Configuration {
 	
 	private String configPath;
 	private String notificationPath;
-	private String waitTime;
-	private String maxWaitTime;
 	private String fileProcessingDir;
 	private String pqqWorkDir;
 	private String pqqProcessedDir;
@@ -38,22 +36,6 @@ public class Configuration {
 
 	public void setNotificationPath(String notificationPath) {
 		this.notificationPath = notificationPath;
-	}
-
-	public String getWaitTime() {
-		return waitTime;
-	}
-
-	public void setWaitTime(String waitTime) {
-		this.waitTime = waitTime;
-	}
-
-	public String getMaxWaitTime() {
-		return maxWaitTime;
-	}
-
-	public void setMaxWaitTime(String maxWaitTime) {
-		this.maxWaitTime = maxWaitTime;
 	}
 
 	public String getFileProcessingDir() {

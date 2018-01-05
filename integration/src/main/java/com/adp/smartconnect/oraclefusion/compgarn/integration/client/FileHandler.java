@@ -126,7 +126,8 @@ public class FileHandler  {
 				jobTrackingService.trackActivity(transId, jobStepId, "Batch Notification", "Batch Notification Completed. Batch Names:"+batchNames);
 				triggerPayRollFlowAndCheckOnStatus(config, clientId, batchNames.get(0),transId, jobStepId);
 			}else{
-				logger.error("BatchNames are Empty. Check errors in HCM");
+				logger.error("BatchNames are Empty/Transfer Batch Error, Check errors in HCM");
+				jobTrackingService.trackException(transId, jobStepId, "Lien Notification Batch Error", "Lien Notification Batch Error, Check errors in HCM");
 			}
 					
 			doneFile.createNewFile();

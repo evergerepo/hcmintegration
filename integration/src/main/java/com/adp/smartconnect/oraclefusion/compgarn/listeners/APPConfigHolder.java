@@ -51,6 +51,14 @@ public class APPConfigHolder {
 		return getKeyStringValue("proxy.port");
 	}
 	
+	public static String getWaitTime(){
+		return getKeyStringValue("waitTime");
+	}
+	
+	public static String getMaxWaitTime(){
+		return getKeyStringValue("maxWaitTime");
+	}
+	
 	/*
 	 * Load application Config file
 	 */
@@ -71,6 +79,8 @@ public class APPConfigHolder {
 			}
 
 			setupSystemProxy();
+			
+			logger.info("App config properties:{}", appConfig);
 		} catch (Exception exc) {
 			logger.error("Error loading app config file loadAppConfig() ", exc);
 		}finally{

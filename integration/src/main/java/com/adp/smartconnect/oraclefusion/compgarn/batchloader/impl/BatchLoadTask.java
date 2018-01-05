@@ -20,6 +20,7 @@ import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 import com.adp.smartconnect.oraclefusion.compgarn.clientConfiguration.ClientConfiguration;
 import com.adp.smartconnect.oraclefusion.compgarn.clientConfiguration.NotificationJobDtl;
 import com.adp.smartconnect.oraclefusion.compgarn.config.Configuration;
+import com.adp.smartconnect.oraclefusion.compgarn.listeners.APPConfigHolder;
 import com.adp.smartconnect.oraclefusion.compgarn.listeners.ClientConfigHolder;
 import com.oracle.xmlns.apps.hcm.processflows.core.flowactionsservice.types.GetFlowTaskInstanceStatus;
 import com.oracle.xmlns.apps.hcm.processflows.core.flowactionsservice.types.GetFlowTaskInstanceStatusResponse;
@@ -208,11 +209,11 @@ public class BatchLoadTask extends WebServiceGatewaySupport {
 					break;
 				} else {
 					logger.info("Lets retry to check status for " + flowInstanceName + "because the status received is [" +result+"]");
-					Thread.sleep(Integer.parseInt(configuration.getWaitTime()));
-					totalWaitTime = totalWaitTime + Integer.parseInt(configuration.getWaitTime());
+					Thread.sleep(Integer.parseInt(APPConfigHolder.getWaitTime()));
+					totalWaitTime = totalWaitTime + Integer.parseInt(APPConfigHolder.getWaitTime());
 				}
 
-				if (totalWaitTime >= (Integer.parseInt(configuration.getMaxWaitTime()))) {
+				if (totalWaitTime >= (Integer.parseInt(APPConfigHolder.getMaxWaitTime()))) {
 					break;
 				}
 				

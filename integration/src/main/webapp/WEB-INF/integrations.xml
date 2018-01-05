@@ -29,8 +29,6 @@
 	<beans:bean id="config" class="com.adp.smartconnect.oraclefusion.compgarn.config.Configuration">
 	    <beans:property name="configPath" value="${configPath}" />
 		<beans:property name="notificationPath" value="${notificationPath}" />
-		<beans:property name="waitTime" value="${waitTime}" />
-		<beans:property name="maxWaitTime" value="${maxWaitTime}" />
 		<beans:property name="fileProcessingDir" value="${fileProcessingDir}" />
 		<beans:property name="pqqWorkDir" value="${pqqWorkDir}" />
 		<beans:property name="pqqProcessedDir" value="${pqqProcessedDir}" />
