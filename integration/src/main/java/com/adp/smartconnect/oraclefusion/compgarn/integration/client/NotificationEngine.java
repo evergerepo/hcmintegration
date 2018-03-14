@@ -34,18 +34,23 @@ public class NotificationEngine {
 	 */
 	public void invokeBatchNotificationFlow(String dirName, List<String> batchNames, String clientName, String transId, String jobStepId) throws Exception {
 
-		// Retrieve Client Configuration
-		ClientConfiguration clientConfiguration = clientConfigurations.getSingleClientData(clientName);
-		NotificationJobDtl config = clientConfiguration.getNotificationJobDtl();
-
-		String notificationInpDir = configuration.getFileProcessingDir() + configuration.getLienDr()+ configuration.getLienOutboundDir();
-		logger.info("Notification Input Directory is " + notificationInpDir);
-		String notificationReportLocation = config.getNotificationReportPath();
-		
-		for (String name : batchNames) {
-			invokeNotificationFlow(clientConfiguration, name, notificationInpDir, notificationReportLocation, clientName,  transId,  jobStepId);
+		try{
+			// Retrieve Client Configuration
+			ClientConfiguration clientConfiguration = clientConfigurations.getSingleClientData(clientName);
+			NotificationJobDtl config = clientConfiguration.getNotificationJobDtl();
+	
+			String notificationInpDir = configuration.getFileProcessingDir() + configuration.getLienDr()+ configuration.getLienOutboundDir();
+			logger.info("Notification Input Directory is " + notificationInpDir);
+			String notificationReportLocation = config.getNotificationReportPath();
+			
+			for (String name : batchNames) {
+				invokeNotificationFlow(clientConfiguration, name, notificationInpDir, notificationReportLocation, clientName,  transId,  jobStepId);
+			}
+		}catch(Exception exc){
+			logger.error("Error Generating Notification Report. Message:"+exc.getMessage(), exc);
+			jobTrackingService.trackException(transId,  jobStepId, "Notification Report Error", "Notification Report Error. Exception: "+exc.getMessage());
+			throw exc;
 		}
-
 	}
 	
 	private void invokeNotificationFlow(ClientConfiguration clientConfiguration, String batchName, String notificationInpDir, 
