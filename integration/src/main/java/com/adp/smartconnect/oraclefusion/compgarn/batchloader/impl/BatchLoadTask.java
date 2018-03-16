@@ -199,9 +199,10 @@ public class BatchLoadTask extends WebServiceGatewaySupport {
 	        	 GetFlowTaskInstanceStatusResponse response  = (GetFlowTaskInstanceStatusResponse)getWebServiceTemplate().marshalSendAndReceive(jobDtl.getNotificationJobGetFlowStatusUrl(), getFlowTaskInstanceStatus);
 	        	 String result  = response.getResult();
 				
-	        	 if(result.equalsIgnoreCase(BatchLoadTaskConstants.ESS_PARENT_JOB_SUB_ERROR)) {
+	        	if(result.equalsIgnoreCase(BatchLoadTaskConstants.ESS_PARENT_JOB_SUB_ERROR)) {
 					break;
-				}else if (result.equalsIgnoreCase(BatchLoadTaskConstants.BATCHLOAD_ERROR_STATUS)) {
+				}else if (result.equalsIgnoreCase(BatchLoadTaskConstants.BATCHLOAD_ERROR_STATUS) 
+						|| result.equalsIgnoreCase(BatchLoadTaskConstants.BATCHLOAD_FUNCTIONAL_ERROR_STATUS) ) {
 					finalResult = result;
 					break;
 				} else if (result.equalsIgnoreCase(BatchLoadTaskConstants.BATCHLOAD_COMPLETETD_STATUS)) {

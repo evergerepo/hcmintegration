@@ -40,7 +40,7 @@ public class NotificationEngine {
 			NotificationJobDtl config = clientConfiguration.getNotificationJobDtl();
 	
 			String notificationInpDir = configuration.getFileProcessingDir() + configuration.getLienDr()+ configuration.getLienOutboundDir();
-			logger.info("Notification Input Directory is " + notificationInpDir);
+			logger.info("Notification Output Directory is :" + notificationInpDir);
 			String notificationReportLocation = config.getNotificationReportPath();
 			
 			for (String name : batchNames) {
